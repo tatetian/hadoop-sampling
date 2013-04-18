@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import me.tatetian.cps.sampler.Sampler;
+
 /**
  * This class is modified from <code>org.apache.commons.io.output.ByteArrayOutputStream</code>.
  * It the same as <code>org.apache.commons.io.output.ByteArrayOutputStream</code> except its

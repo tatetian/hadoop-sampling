@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -23,13 +24,12 @@ public class TestCascadingSampledDataOutputStream extends junit.framework.TestCa
 		validate(dest, size);
 	}
 	
-//	public void testHDFSCreate() throws IOException {
-//		String dest = "hdfs://localhost/hadoop-sampling/test_cascading_sampling.data.sampled";
-//		int size = 1024;
-//		create(dest, size);
-//		validate(dest, size);
-//	}
-//	
+	public void testHDFSCreate() throws IOException {
+		String dest = "hdfs://localhost/hadoop-sampling/test_cascading_sampling.data.sampled";
+		int size = 1024;
+		create(dest, size);
+		validate(dest, size);
+	}
 
 	//===========================================================================
 	// Helper functions
@@ -40,7 +40,13 @@ public class TestCascadingSampledDataOutputStream extends junit.framework.TestCa
 	 * */
 	private FileSystem getFS(String dest) throws IOException {
 		Configuration conf = new Configuration(); 
-		conf.setInt("dfs.block.size", 10);	// Make it much smaller than default 
+		Map<String, String> env = System.getenv();
+    for (String envName : env.keySet()) {
+        System.out.format("%s=%s%n",
+                          envName,
+                          env.get(envName));
+    }
+		//conf.setInt("dfs.block.size", 10);	// Make it much smaller than default 
     //conf.addResource(new Path("/opt/hadoop-0.20.0/conf/core-site.xml"));
     //conf.addResource(new Path("/opt/hadoop-0.20.0/conf/hdfs-site.xml"));
 		FileSystem fs = FileSystem.get(URI.create(dest), conf);

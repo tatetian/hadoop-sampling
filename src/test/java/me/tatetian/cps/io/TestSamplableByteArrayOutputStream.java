@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import me.tatetian.cps.sampler.BernoulliSampler;
+import me.tatetian.cps.sampler.Sampler;
+import me.tatetian.cps.sampler.SystematicSampler;
+
 import junit.framework.Assert;
 
 public class TestSamplableByteArrayOutputStream extends junit.framework.TestCase {

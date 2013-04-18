@@ -1,4 +1,4 @@
-package me.tatetian.cps.io;
+package me.tatetian.cps.sampler;
 
 import java.util.Random;
 

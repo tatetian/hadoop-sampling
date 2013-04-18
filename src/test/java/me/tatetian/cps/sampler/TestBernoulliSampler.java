@@ -1,5 +1,6 @@
-package me.tatetian.cps.io;
+package me.tatetian.cps.sampler;
 
+import me.tatetian.cps.sampler.BernoulliSampler;
 import junit.framework.Assert;
 
 public class TestBernoulliSampler extends junit.framework.TestCase {

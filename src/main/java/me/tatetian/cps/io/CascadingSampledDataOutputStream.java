@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
+import me.tatetian.cps.sampler.BernoulliSampler;
+
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -134,6 +136,7 @@ public class CascadingSampledDataOutputStream extends DataOutputStream implement
 			MAX_SAMPLING_LEVEL 			= fs.getConf().getInt("cps.sampling.level.max", 8);				// 8 levels at most by default
 			// TODO: check
 			MIN_SAMPLING_FILE_SIZE 	= fs.getConf().getInt("dfs.block.size", 867108864) / 2;		// 32MB by default
+			System.out.println(MIN_SAMPLING_FILE_SIZE);
 			// Vars
 			this.fs = fs;
 			this.path = path;
