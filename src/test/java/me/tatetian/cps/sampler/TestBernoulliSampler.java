@@ -1,16 +1,41 @@
 package me.tatetian.cps.sampler;
 
+import java.util.Arrays;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
 import me.tatetian.cps.sampler.BernoulliSampler;
 import junit.framework.Assert;
 
-public class TestBernoulliSampler extends junit.framework.TestCase {
+public class TestBernoulliSampler{
 	//===========================================================================
 	// Test Cases
 	//===========================================================================
 	
 	/**
+	 * Test the performance of sampler
+	 * 
+	 * For the naive implementation, it takes 14.624000 seconds to do 1 million 
+	 * times of sampling on my machine; For amortized implementation, it takes only
+	 * 4.891000 seconds, a speed-up of over 3X. 
+	 * */
+	@Test
+	public void testPerformance() {
+		int sampleRatio = 16;
+		BernoulliSampler bs = new BernoulliSampler(sampleRatio);
+		int N = 1000 * 1000 * 1000;
+		long startTime = System.currentTimeMillis();
+		for(int i = 0; i < N; i++) bs.next();
+		long endTime = System.currentTimeMillis();
+		float elapsedSeconds = (endTime - startTime) / 1000.0f;
+		System.out.format("Takes %f seconds to do %d times of sampling\n", elapsedSeconds, N);
+	}
+	
+	/**
 	 * Test the sampler gives equal chance for each possibility of choice
 	 **/
+	@Test
 	public void testUniform() {
 		int sampleRatio = 16;
 		BernoulliSampler bs = new BernoulliSampler(sampleRatio);
@@ -30,6 +55,7 @@ public class TestBernoulliSampler extends junit.framework.TestCase {
 	/**
 	 *  Test the sampler follows Bernoulli distribution
 	 **/
+	@Test
 	public void testDistribution() {
 		// Prepare sampler
 		int sampleRatio = 16;													// proportion of sample

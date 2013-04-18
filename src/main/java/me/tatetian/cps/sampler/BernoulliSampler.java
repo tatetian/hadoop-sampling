@@ -7,6 +7,8 @@ import java.util.Random;
  *	equal probability for each population unit to be sampled.
  */
 public class BernoulliSampler implements Sampler {
+	private double[] F;
+	
 	/**
 	 * Constructor
 	 * @param samplingRatio each population unit has 1/samplingRatio chance of being sampled
@@ -16,14 +18,33 @@ public class BernoulliSampler implements Sampler {
 		
 		this.samplingRatio = samplingRatio;
 		this.random = new Random();
+		
+		// init F
+		F = new double[2 * samplingRatio + 1];
+		double p0 = 1.0 / samplingRatio, p = p0;
+		F[0] = p;
+		for(int i = 1; i < F.length; i++) {
+			p = p * (1 - p0);
+			F[i] = p + F[i-1];
+		}
+		F[F.length-1] = 1.0;
 	}
+	
+	private int skip = -1;
+	private boolean notSkipAll = false;
 	
 	/**
 	 * Sample the next population unit? 	
 	 **/
 	@Override
 	public boolean next() {
-		return random.nextInt(samplingRatio) == 0; 
+		if(skip < 0) {
+			double f = random.nextDouble();
+			skip = 0;
+			while(f > F[skip]) skip++;
+			notSkipAll = skip < F.length - 1;
+		}
+		return skip-- == 0 && notSkipAll;
 	}
 	
 	/**

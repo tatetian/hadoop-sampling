@@ -2,7 +2,6 @@ package me.tatetian.dataset;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Random;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 
@@ -15,11 +14,11 @@ public class NumericDataSet extends DataSet {
 
 	@Override
 	public void dump(FSDataOutputStream out) throws IOException {
-		long seed = 100L;
-		Random random = new Random(seed);		
 		for(int i = 0; i < numRecords; i++) {
-			random.nextLong();
-			out.writeBytes(Long.toString(random.nextLong()));
+			for(int j = 0; j < 10; j++) {
+				out.writeBytes(Long.toString(i));
+				out.write(' ');
+			}
 			out.writeByte('\n');
 		}
 		out.close();
@@ -27,11 +26,11 @@ public class NumericDataSet extends DataSet {
 
 	@Override
 	public void dump(CascadingSampledDataOutputStream out) throws IOException {
-		long seed = 100L;
-		Random random = new Random(seed);
 		for(int i = 0; i < numRecords; i++) {
-			random.nextLong();
-			out.writeBytes(Long.toString(random.nextLong()));
+			for(int j = 0; j < 10; j++) {
+				out.writeBytes(Long.toString(i));
+				out.write(' ');
+			}
 			out.writeSeparator();	
 		}
 		out.close();	
