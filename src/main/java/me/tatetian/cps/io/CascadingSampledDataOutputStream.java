@@ -173,6 +173,17 @@ public class CascadingSampledDataOutputStream extends DataOutputStream implement
     	}
     }
     
+    @Override
+    public void write(byte b[], int off, int len) throws IOException {
+    	// Write to data file
+    	out.write(b, off, len);
+    	// Write to sample file
+    	if(samplingLevelOfCurrentRecord > 0) {
+    		int i = samplingLevelOfCurrentRecord;
+    		while(--i >= 0) outs[i].write(b, off, len); 
+    	}
+    } 
+    
     /**
      * Start a new record
      * 

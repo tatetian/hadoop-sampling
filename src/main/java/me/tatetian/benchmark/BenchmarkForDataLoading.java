@@ -15,11 +15,15 @@ import me.tatetian.dataset.NumericDataSet;
 
 public class BenchmarkForDataLoading extends Benchmark {
 	public BenchmarkForDataLoading(String destFile, int numRecords) {
-		super("Benchamark for Data Loading with or without Sampling");
+		this(destFile, numRecords, Benchmark.DEFAULT_NUM_REPEATS);
+	}
+	
+	public BenchmarkForDataLoading(String destFile, int numRecords, int numRepeats) {
+		super("Benchamark for Data Loading with or without Sampling", numRepeats);
 		
 		DataSet ds = new NumericDataSet(numRecords);
-		addTask(new DataLoadingTaskWithSampling(destFile + ".sampled", ds));
     addTask(new DataLoadingTaskWithoutSampling(destFile, ds));
+    addTask(new DataLoadingTaskWithSampling(destFile + ".sampled", ds));
 	}
 	
 	private static abstract class DataLoadingTask extends Task {
