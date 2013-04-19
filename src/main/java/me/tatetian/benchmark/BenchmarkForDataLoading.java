@@ -18,8 +18,8 @@ public class BenchmarkForDataLoading extends Benchmark {
 		super("Benchamark for Data Loading with or without Sampling");
 		
 		DataSet ds = new NumericDataSet(numRecords);
-		addTask(new DataLoadingTaskWithoutSampling(destFile, ds));
 		addTask(new DataLoadingTaskWithSampling(destFile + ".sampled", ds));
+    addTask(new DataLoadingTaskWithoutSampling(destFile, ds));
 	}
 	
 	private static abstract class DataLoadingTask extends Task {
@@ -50,6 +50,7 @@ public class BenchmarkForDataLoading extends Benchmark {
 				Path destPath = new Path(destFile);
 				FSDataOutputStream out = fs.create(destPath);
 				dataSet.dump(out);
+        out.hflush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -73,6 +74,7 @@ public class BenchmarkForDataLoading extends Benchmark {
 				Path destPath = new Path(destFile);
 				CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, destPath);
 				dataSet.dump(out);
+        out.hflush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

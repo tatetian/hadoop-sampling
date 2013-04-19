@@ -1,7 +1,11 @@
 package me.tatetian.benchmark;
 
 public abstract class Task {
+  private static final int NUM_REPEATS = 5;
+  private static final boolean SKIP_FIRST = true;
+
 	private long runningTime = -1;
+  private long totalTime = -1;
 	private String name = null;
 	
 	protected abstract void doRun();
@@ -11,12 +15,19 @@ public abstract class Task {
 	}
 	
 	public void run() {
-		before();
-		runningTime = System.currentTimeMillis();
-		doRun();
-		runningTime = System.currentTimeMillis() - runningTime;
-		after();
-		result();
+    if(SKIP_FIRST) doRun();
+
+    totalTime = 0;
+    for(int i = 0; i <= NUM_REPEATS; i++) { 
+      before();
+      runningTime = System.currentTimeMillis();
+      doRun();
+      runningTime = System.currentTimeMillis() - runningTime;
+      totalTime += runningTime;
+      after();
+      result();
+    }
+    log("Average running time is %f seconds\n", totalTime / NUM_REPEATS / 1000.0f );
 	}
 	
 	public String getName() {
