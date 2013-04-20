@@ -14,6 +14,14 @@ public abstract class DataSet {
 		this.numRecords = numRecords;
 	} 
 	
+	public int getNumRecords() {
+		return numRecords;
+	}
+	
+	public void setNumReords(int numRecords) {
+		this.numRecords = numRecords;
+	}
+	
 	public abstract void dump(FSDataOutputStream out) throws IOException;
 	public abstract void dump(CascadingSampledDataOutputStream out) throws IOException;
 }

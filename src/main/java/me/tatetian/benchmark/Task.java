@@ -5,6 +5,8 @@ public abstract class Task {
 	private String name = null;
 	private boolean logging = true;
 	
+	protected String description = null;
+	
 	protected abstract void doRun();
 	
 	public Task(String name) {
@@ -24,6 +26,14 @@ public abstract class Task {
 		return name;
 	}
 	
+	public void setDescription(String description) {
+		this.description = description;
+	} 
+	
+	public String getDescription() {
+		return description;
+	}
+	
 	public long getRunningTime() {
 		return runningTime;
 	}
@@ -33,15 +43,16 @@ public abstract class Task {
 	}
 	
 	protected void before() {
-		log("Running job `%s`...\n", name);
+		log("Running job `%s`...", name);
+		if(description != null) log(description);
 	}
 	
 	protected void after() {
-		log("Finished job `%s` (in %f seconds)\n", name, runningTime / 1000.0f);
+		log("Finished job `%s` (in %f seconds)", name, runningTime / 1000.0f);
 	}
 	
 	protected void log(String format, Object ... args) {
-		if(logging) System.out.format("[Task] " + format, args);
+		if(logging) System.out.format("[Task] " + format + "\n", args);
 	}
 	
 	protected void disalbeLog() {

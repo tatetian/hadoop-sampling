@@ -222,9 +222,9 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	        throw new IllegalArgumentException(
 	            "Negative initial size: " + size);
 	    }
-	    synchronized (this) {
+//	    synchronized (this) {
 	        needNewBuffer(size);
-	    }
+//	    }
 	}
 	
 	/**
@@ -276,7 +276,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	    } else if (len == 0) {
 	        return;
 	    }
-	    synchronized (this) {
+//	    synchronized (this) {
 	        int newcount = count + len;
 	        int remaining = len;
 	        int inBufferPos = count - filledBufferSum;
@@ -293,7 +293,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	        
 	        // Added by Hongliang Tian
 	        recordSize += len;
-	    }
+//	    }
 	}
 	
 	/**
@@ -301,7 +301,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	 * @param b the byte to write
 	 */
 	@Override
-	public synchronized void write(int b) {
+	public /*synchronized*/ void write(int b) {
 	    int inBufferPos = count - filledBufferSum;
 	    if (inBufferPos == currentBuffer.length) {
 	        needNewBuffer(count + 1);
@@ -350,7 +350,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	 * Return the current size of the byte array.
 	 * @return the current size of the byte array
 	 */
-	public synchronized int size() {
+	public /*synchronized*/ int size() {
 	    return count;
 	}
 	
@@ -370,7 +370,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	/**
 	 * @see java.io.ByteArrayOutputStream#reset()
 	 */
-	public synchronized void reset() {
+	public /*synchronized*/ void reset() {
 			// Modified by Hongliang Tian
 	    oldReset();
 	    
@@ -387,7 +387,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	 * @throws IOException if an I/O error occurs, such as if the stream is closed
 	 * @see java.io.ByteArrayOutputStream#writeTo(OutputStream)
 	 */
-	public synchronized void writeTo(OutputStream out) throws IOException {
+	public /*synchronized*/ void writeTo(OutputStream out) throws IOException {
 	    int remaining = count;
 	    for (byte[] buf : buffers) {
 	        int c = Math.min(buf.length, remaining);
@@ -461,7 +461,7 @@ public class SamplableByteArrayOutputStream extends OutputStream {
 	 * @return the current contents of this output stream, as a byte array
 	 * @see java.io.ByteArrayOutputStream#toByteArray()
 	 */
-	public synchronized byte[] toByteArray() {
+	public /*synchronized*/ byte[] toByteArray() {
 	    int remaining = count;
 	    if (remaining == 0) {
 	        return EMPTY_BYTE_ARRAY; 

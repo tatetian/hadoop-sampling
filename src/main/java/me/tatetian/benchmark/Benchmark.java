@@ -28,21 +28,22 @@ public abstract class Benchmark extends Task {
 			long totalTime = 0;
 			for(int i = 0; i < numRepeats; i++) {
 				t.run();
-				System.gc();
 				totalTime += t.getRunningTime();
+				System.gc();
 			}
-			t.log("Average running time of `%s` is %f seconds\n", t.getName(), totalTime / numRepeats / 1000.0f );
+			t.log("Average running time of `%s` is %f seconds", t.getName(), totalTime / numRepeats / 1000.0f );
 		}
 	}
 
 	@Override
 	protected void before() {
-		log("Running benchmark `%s`...\n", getName());
+		log("Running benchmark `%s`...", getName());
+		if(description != null) log(description);
 	}
 	
 	@Override
 	protected void after() {
-		log("Finished benchmark `%s` (in total %f seconds)\n", getName(), getRunningTime() / 1000.0f);
+		log("Finished benchmark `%s` (in total %f seconds)", getName(), getRunningTime() / 1000.0f);
 	}
 	
 	protected void addTask(Task task) {
@@ -50,7 +51,7 @@ public abstract class Benchmark extends Task {
 	} 
 	
 	protected void log(String format, Object ... args) {
-		System.out.format("[Benchmark] " + format, args);
+		System.out.format("[Benchmark] " + format + "\n", args);
 	}
 	
 	protected List<Task> tasks = new ArrayList<Task>();
