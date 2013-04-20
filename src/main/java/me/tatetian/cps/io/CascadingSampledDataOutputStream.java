@@ -52,8 +52,8 @@ public class CascadingSampledDataOutputStream extends DataOutputStream implement
 	 * so that the <code>OutputStream</code> can sample records accordingly. 
 	 * */
 	public void writeSeparator() throws IOException {
-		write("\n".getBytes("UTF-8"));
-		((CascadingSampledDataOutputStreamImpl)this.out).newRecord();
+		write('\n');
+		impl.newRecord();
 	}
 	
 	//===========================================================================
@@ -85,7 +85,11 @@ public class CascadingSampledDataOutputStream extends DataOutputStream implement
    * */
 	private CascadingSampledDataOutputStream(FileSystem fs, Path path, boolean appendMode) throws IOException {
 		super(new CascadingSampledDataOutputStreamImpl(fs, path, appendMode));
+		impl = (CascadingSampledDataOutputStreamImpl)this.out;
 	}
+	
+	
+	private CascadingSampledDataOutputStreamImpl impl = null;
 	
 	/**
 	 * Private implementation class
@@ -141,7 +145,8 @@ public class CascadingSampledDataOutputStream extends DataOutputStream implement
 			this.path = path;
 			// Prepare streams
 			try {
-				out 		= fs.create(path);																									// data file
+				int bufferSize = 4096 * 64;
+				out 		= fs.create(path, true, bufferSize);																									// data file
 				lastOut = new SamplableByteArrayOutputStream(MIN_SAMPLING_FILE_SIZE+1024);	// a buffer that is slightly larger than threshold
 				outs		= new OutputStream[MAX_SAMPLING_LEVEL];															// cascading persistence sampling files
 			}

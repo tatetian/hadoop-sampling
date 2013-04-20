@@ -38,13 +38,14 @@ public class BernoulliSampler implements Sampler {
 	 **/
 	@Override
 	public boolean next() {
-		if(skip < 0) {
+		/*if(skip < 0) {
 			double f = random.nextDouble();
 			skip = 0;
 			while(f > F[skip]) skip++;
 			notSkipAll = skip < F.length - 1;
 		}
-		return skip-- == 0 && notSkipAll;
+		return skip-- == 0 && notSkipAll;*/
+		return random.nextInt() % samplingRatio == 0;
 	}
 	
 	/**

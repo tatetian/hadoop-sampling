@@ -6,6 +6,7 @@ import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -23,6 +24,8 @@ public class BenchmarkForDataLoading extends Benchmark {
 	public BenchmarkForDataLoading(String destFile, int numRecords, int numRepeats) {
 		super("Benchamark for Data Loading with or without Sampling", numRepeats);
 		
+		removeOldFile(destFile);
+		
 		dataSet = new NumericDataSet(numRecords);
     addTask(new DataLoadingTaskWithoutSampling(destFile, dataSet));
     addTask(new DataLoadingTaskWithSampling(destFile + ".sampled", dataSet));
@@ -30,6 +33,21 @@ public class BenchmarkForDataLoading extends Benchmark {
 	
 	public DataSet getDataSet() {
 		return dataSet;
+	}
+	
+	private void removeOldFile(String destFile) {
+		FileSystem fs;
+		Configuration conf = new Configuration(); 
+		try {
+			fs = FileSystem.get(URI.create(destFile), conf);
+			Path pathPattern = new Path(destFile + "*");
+			FileStatus[] filesToRemove = fs.globStatus(pathPattern); 
+			for(FileStatus f : filesToRemove) {
+				fs.delete(f.getPath(), false);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private static abstract class DataLoadingTask extends Task {
@@ -58,7 +76,8 @@ public class BenchmarkForDataLoading extends Benchmark {
 			try {
 				fs = FileSystem.get(URI.create(destFile), conf);
 				Path destPath = new Path(destFile);
-				FSDataOutputStream out = fs.create(destPath);
+				int bufferSize = 4096 * 64;
+				FSDataOutputStream out = fs.create(destPath, true, bufferSize);
 				dataSet.dump(out);
         out.hflush();
 			} catch (IOException e) {
