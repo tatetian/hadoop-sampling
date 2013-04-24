@@ -7,11 +7,17 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 
 import me.tatetian.cps.io.CascadingSampledDataOutputStream;
 
-public abstract class DataSet {
+public class DataSet {
 	protected int numRecords = 0;
+	protected FieldGenerator[] fieldGenerators = null;
 	
-	public DataSet(int numRecords) {
+	public DataSet(FieldGenerator[] fieldGenerators ) {
+		this(100, fieldGenerators);
+	}
+	
+	public DataSet(int numRecords, FieldGenerator[] fieldGenerators ) {
 		this.numRecords = numRecords;
+		this.fieldGenerators = fieldGenerators;
 	} 
 	
 	public int getNumRecords() {
@@ -22,6 +28,29 @@ public abstract class DataSet {
 		this.numRecords = numRecords;
 	}
 	
-	public abstract void dump(FSDataOutputStream out) throws IOException;
-	public abstract void dump(CascadingSampledDataOutputStream out) throws IOException;
+	public FieldGenerator[] getFieldGenerators() {
+		return fieldGenerators;
+	}
+	
+	public void dump(FSDataOutputStream out) throws IOException {
+		for(int i = 0; i < numRecords; i++) {
+			for(int j = 0; j < fieldGenerators.length; j++) {
+				if(j != 0) out.write('\t');
+				out.write(fieldGenerators[j].next());
+			}
+			out.writeByte('\n');
+		}
+		out.close();
+	}
+
+	public void dump(CascadingSampledDataOutputStream out) throws IOException {
+		for(int i = 0; i < numRecords; i++) {
+			for(int j = 0; j < fieldGenerators.length; j++) {
+				if(j != 0) out.write('\t');
+				out.write(fieldGenerators[j].next());
+			}
+			out.writeSeparator();	
+		}
+		out.close();
+	}
 }

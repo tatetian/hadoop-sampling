@@ -12,7 +12,7 @@ import org.apache.hadoop.fs.Path;
 
 import me.tatetian.cps.io.CascadingSampledDataOutputStream;
 import me.tatetian.dataset.DataSet;
-import me.tatetian.dataset.NumericDataSet;
+import me.tatetian.dataset.DataSetFactory;
 
 public class BenchmarkForDataLoading extends Benchmark {
 	private DataSet dataSet = null;
@@ -26,7 +26,8 @@ public class BenchmarkForDataLoading extends Benchmark {
 		
 		removeOldFile(destFile);
 		
-		dataSet = new NumericDataSet(numRecords);
+		dataSet = DataSetFactory.makeRepeatedString();
+		dataSet.setNumReords(numRecords);
     addTask(new DataLoadingTaskWithoutSampling(destFile, dataSet));
     addTask(new DataLoadingTaskWithSampling(destFile + ".sampled", dataSet));
 	}
@@ -79,7 +80,7 @@ public class BenchmarkForDataLoading extends Benchmark {
 				int bufferSize = 4096 * 64;
 				FSDataOutputStream out = fs.create(destPath, true, bufferSize);
 				dataSet.dump(out);
-        out.hflush();
+       // out.hflush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -103,7 +104,7 @@ public class BenchmarkForDataLoading extends Benchmark {
 				Path destPath = new Path(destFile);
 				CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, destPath);
 				dataSet.dump(out);
-        out.hflush();
+        //out.hflush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

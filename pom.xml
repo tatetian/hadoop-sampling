@@ -109,6 +109,17 @@
       <artifactId>guava</artifactId>
       <scope>provided</scope>
      </dependency>
+     <dependency>
+		  <groupId>org.apache.commons</groupId>
+		  <artifactId>commons-math3</artifactId>
+		  <version>3.0</version>
+		 </dependency>
+		 <dependency>
+			<groupId>org.apache.mrunit</groupId>
+			<artifactId>mrunit</artifactId>
+			<version>0.9.0-incubating</version>
+			<classifier>hadoop2</classifier> 
+     </dependency>
   </dependencies>
   
   <build>
