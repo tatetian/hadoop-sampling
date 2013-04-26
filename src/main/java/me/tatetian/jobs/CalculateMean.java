@@ -16,9 +16,11 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Mapper.Context;
@@ -136,11 +138,13 @@ public class CalculateMean extends Configured implements Tool {
 		}
 		
 		Configuration conf = getConf();
+//		FileSplit fs = new FileSplit();
 
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
     job.setMapperClass(CalculateMeanMapper.class);
     job.setReducerClass(CalculateMeanReducer.class);
+    job.setCombinerClass(CalculateMeanReducer.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Pair.class);
     job.setOutputKeyClass(Text.class);
@@ -151,6 +155,9 @@ public class CalculateMean extends Configured implements Tool {
     Path output = new Path(args[1]);
     FileOutputFormat.setOutputPath(job, output);
 		 
+    //job.setInputFormatClass(
+    //Class.forName(args[++i]).asSubclass(InputFormat.class));
+    
 		return (job.waitForCompletion(true) ? 0 : 1);
 	}
 	

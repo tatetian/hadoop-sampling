@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+
+import me.tatetian.cps.io.CascadingSampledDataOutputStream;
+import me.tatetian.dataset.DataSet;
+import me.tatetian.dataset.DataSetFactory;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,6 +34,12 @@ public class TestCalculateMeanDriver {
     output = new Path("tmp/mean_output");
     
     fs = FileSystem.getLocal(conf);
+    // overwrite input file
+    double mean = 80, sd = 40; 
+		DataSet dataSet = DataSetFactory.makeNormalDist(mean, sd);
+		CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, input);
+		dataSet.dump(out);
+		// delete old output file
     fs.delete(output, true);
   }
 
