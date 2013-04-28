@@ -12,6 +12,19 @@ public class IndexMeta implements Writable {
 	public int 	dataRecordNum = -1;
 	public long indexBlockOffset = -1;
 	public long indexBlockLen = -1;
+
+	public IndexMeta() {}
+	
+	public IndexMeta(long dataBlockOffset, long dataBlockLen,
+									 int dataRecordNum, 
+									 long indexBlockOffset, long indexBlockLen) 
+	{
+		this.dataBlockOffset = dataBlockOffset;
+		this.dataBlockLen = dataBlockLen;
+		this.dataRecordNum = dataRecordNum;
+		this.indexBlockOffset = indexBlockOffset;
+		this.indexBlockLen = indexBlockLen;
+	}
 	
 	@Override
 	public void write(DataOutput out) throws IOException {
