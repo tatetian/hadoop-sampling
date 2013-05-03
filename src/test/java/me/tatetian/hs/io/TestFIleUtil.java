@@ -7,7 +7,6 @@ import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestFileUtil {

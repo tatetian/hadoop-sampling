@@ -12,6 +12,7 @@ import me.tatetian.hs.index.IndexFile;
 import me.tatetian.hs.index.IndexMeta;
 import me.tatetian.hs.index.IndexMetaFile;
 import me.tatetian.hs.index.IndexUtil;
+import me.tatetian.hs.jobs.meancalculation.CalculateMean;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;

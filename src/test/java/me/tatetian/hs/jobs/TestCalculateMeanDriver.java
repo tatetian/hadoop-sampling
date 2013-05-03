@@ -9,7 +9,7 @@ import java.net.URI;
 import me.tatetian.hs.dataset.DataSet;
 import me.tatetian.hs.dataset.DataSetFactory;
 import me.tatetian.hs.io.CascadingSampledDataOutputStream;
-import me.tatetian.hs.jobs.CalculateMean;
+import me.tatetian.hs.jobs.meancalculation.CalculateMean;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
