@@ -7,13 +7,17 @@ import java.io.IOException;
 import org.apache.hadoop.io.Writable;
 
 public class IndexMeta implements Writable {
-	public long dataBlockOffset = -1;
-	public long dataBlockLen = -1;
-	public int 	dataRecordNum = -1;
-	public long indexBlockOffset = -1;
-	public long indexBlockLen = -1;
+	public long dataBlockOffset = 0;
+	public long dataBlockLen = 0;
+	public int 	dataRecordNum = 0;
+	public long indexBlockOffset = 0;
+	public long indexBlockLen = 0;
 
 	public IndexMeta() {}
+
+	public IndexMeta(long dataBlockOffset, long indexBlockOffset) {
+		this(dataBlockOffset, 0, 0, indexBlockOffset, 0);
+	} 
 	
 	public IndexMeta(long dataBlockOffset, long dataBlockLen,
 									 int dataRecordNum, 
@@ -66,5 +70,13 @@ public class IndexMeta implements Writable {
 					 dataRecordNum	 == another.dataRecordNum &&
 					 indexBlockOffset == another.indexBlockOffset &&
 					 indexBlockLen 	 == another.indexBlockLen;
+	}
+
+	public void clear() {
+		dataBlockOffset = 0;
+		dataBlockLen = 0;
+		dataRecordNum = 0;
+		indexBlockOffset = 0;
+		indexBlockLen = 0;
 	}
 }

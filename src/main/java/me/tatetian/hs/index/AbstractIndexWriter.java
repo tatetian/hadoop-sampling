@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.sun.jersey.core.reflection.ReflectionHelper;
@@ -15,18 +16,23 @@ public class AbstractIndexWriter<V>  implements java.io.Closeable, Syncable {
 	private SequenceFile.Writer writer = null;
 	private IntWritable blockId = new IntWritable(0);
 	
-	public AbstractIndexWriter(Configuration conf, Path path, Class valueClass) throws IOException {
+	public AbstractIndexWriter(Configuration conf, Path path, Class valueClass, Progressable progress) throws IOException {
 		int buffSize = getBuffSize(conf);
 		this.writer = SequenceFile.createWriter(conf, 
 																						SequenceFile.Writer.file(path), 
 																						SequenceFile.Writer.keyClass(IntWritable.class),
 																						SequenceFile.Writer.valueClass(valueClass), 
-																						SequenceFile.Writer.bufferSize(buffSize));
+																						SequenceFile.Writer.bufferSize(buffSize), 
+																						SequenceFile.Writer.progressable(progress));
 	}
 	
 	public void append(V val) throws IOException {
 		writer.append(blockId, val);
 		blockId.set(blockId.get() + 1);
+	}
+	
+	public long getPosition() throws IOException {
+		return writer.getLength();
 	}
 	
 	@Override
