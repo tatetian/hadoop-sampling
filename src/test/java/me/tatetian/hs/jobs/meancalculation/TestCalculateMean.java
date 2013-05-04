@@ -1,4 +1,4 @@
-package me.tatetian.hs.jobs;
+package me.tatetian.hs.jobs.meancalculation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestCalculateMeanDriver {
+public class TestCalculateMean {
   private Configuration conf;
   private Path input;
   private Path output;
@@ -31,9 +31,9 @@ public class TestCalculateMeanDriver {
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
     
-    input = new Path("tmp/test_mean_dataset.data.sampled");
+    input = new Path("tmp/test_mean_dataset.data");
     output = new Path("tmp/mean_output");
-    
+    	
     fs = FileSystem.getLocal(conf);
     // overwrite input file
     double mean = 80, sd = 40; 
@@ -46,7 +46,7 @@ public class TestCalculateMeanDriver {
 
   @Test
   public void test() throws Exception {
-  	CalculateMean calculateMean = new CalculateMean();
+  	CalculateMean calculateMean = getCalculateMeanInstance(); 
   	calculateMean.setConf(conf);
     
     int exitCode = calculateMean.run(new String[] {input.toString(), output.toString()});
@@ -68,5 +68,8 @@ public class TestCalculateMeanDriver {
       IOUtils.closeStream(in);
     }
   }
-
+  
+  protected CalculateMean getCalculateMeanInstance() {
+  	return new CalculateMean();
+  }
 }

@@ -9,6 +9,7 @@ import me.tatetian.hs.jobs.meancalculation.Pair;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
@@ -16,8 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestCalculateMeanMapperAndReducer {
-	MapDriver<LongWritable, Text, Text, Pair> mapDriver;
-  ReduceDriver<Text, Pair, Text, DoubleWritable> reduceDriver;
+	MapDriver<LongWritable, Text, NullWritable, Pair> mapDriver;
+  ReduceDriver<NullWritable, Pair, Text, DoubleWritable> reduceDriver;
 
   @Before
   public void setUp() {
@@ -30,7 +31,7 @@ public class TestCalculateMeanMapperAndReducer {
   @Test
   public void testMapper() {
     mapDriver.withInput(new LongWritable(), new Text("2.2"));
-    mapDriver.withOutput(new Text(), new Pair(1, 2.2));
+    mapDriver.withOutput(NullWritable.get(), new Pair(1, 2.2));
     mapDriver.runTest();
   }
 
@@ -39,7 +40,7 @@ public class TestCalculateMeanMapperAndReducer {
 	  List<Pair> values = new ArrayList<Pair>();
 	  values.add(new Pair(3, 3.0));
 	  values.add(new Pair(7, 1.0));
-	  reduceDriver.withInput(new Text(), values);
+	  reduceDriver.withInput(NullWritable.get(), values);
 	  reduceDriver.withOutput(new Text("count"), new DoubleWritable(10));
 	  reduceDriver.withOutput(new Text("sum"), new DoubleWritable(4.0));
 	  reduceDriver.withOutput(new Text("average"), new DoubleWritable(0.4));

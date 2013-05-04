@@ -3,12 +3,13 @@ package me.tatetian.hs.jobs.meancalculation;
 import java.io.IOException;
 
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class CalculateMeanReducer extends Reducer<Text, Pair, Text, DoubleWritable> {
+public class CalculateMeanReducer extends Reducer<NullWritable, Pair, Text, DoubleWritable> {
 	@Override
-	protected void reduce(Text key, Iterable<Pair> values, Context context) throws IOException, InterruptedException {
+	protected void reduce(NullWritable key, Iterable<Pair> values, Context context) throws IOException, InterruptedException {
 		int count = 0;
 		double sum = 0.0;
 		for(Pair v : values) {

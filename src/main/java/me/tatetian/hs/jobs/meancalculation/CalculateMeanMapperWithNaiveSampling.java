@@ -1,24 +1,39 @@
 package me.tatetian.hs.jobs.meancalculation;
 
 import java.io.IOException;
+import java.util.Random;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class CalculateMeanMapper extends Mapper<LongWritable, Text, NullWritable, Pair> {
+public class CalculateMeanMapperWithNaiveSampling extends Mapper<LongWritable, Text, NullWritable, Pair> {
 	protected Text emptyKey = new Text();
 	
 	private double sum = 0;
 	private int count = 0;
-
+	private Random random = new Random();
+	private float samplingRatio = 1.0f;
+	
 	@Override
 	protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-		String line = value.toString();
-		count ++;
-		sum += Double.parseDouble(line);
+		if(random.nextFloat() < samplingRatio) {
+			String line = value.toString();
+			count ++;
+			sum += Double.parseDouble(line);
+		}
 	}
+
+	/**
+   * Called once at the beginning of the task.
+   */
+  protected void setup(Context context
+                       ) throws IOException, InterruptedException {
+  	Configuration conf = context.getConfiguration();
+  	samplingRatio = conf.getFloat("cps.sampling.ratio", 1.0f); 
+  }
 	
 	@Override
 	/**

@@ -53,6 +53,14 @@ public class Pair implements Writable{
 		public double getAverage() {
 			return sum / count;
 		}
+		
+		public void addCount(int count) {
+			this.count += count;
+		}
+		
+		public void addSum(double sum) {
+			this.sum += sum;
+		}
 
 		@Override
 		public void write(DataOutput out) throws IOException {

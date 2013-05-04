@@ -4,6 +4,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -21,15 +22,12 @@ public class CalculateMean extends Configured implements Tool {
 		}
 		
 		Configuration conf = getConf();
-//		FileSplit fs = new FileSplit();
-
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
     job.setMapperClass(CalculateMeanMapper.class);
     job.setReducerClass(CalculateMeanReducer.class);
-    // TODO: why specifying combiner whould cause error?
-    //job.setCombinerClass(CalculateMeanReducer.class);
-    job.setMapOutputKeyClass(Text.class);
+    job.setCombinerClass(CalculateMeanCombiner.class);
+    job.setMapOutputKeyClass(NullWritable.class);
     job.setMapOutputValueClass(Pair.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(DoubleWritable.class);
@@ -38,11 +36,14 @@ public class CalculateMean extends Configured implements Tool {
     FileInputFormat.addInputPath(job,input);
     Path output = new Path(args[1]);
     FileOutputFormat.setOutputPath(job, output);
-		 
-    //job.setInputFormatClass(
-    //Class.forName(args[++i]).asSubclass(InputFormat.class));
+    
+    customConfiguration(job);
     
 		return (job.waitForCompletion(true) ? 0 : 1);
+	}
+	
+	protected void customConfiguration(Job job) {
+		// no operation
 	}
 	
 	public static void main(String[] args) throws Exception {
