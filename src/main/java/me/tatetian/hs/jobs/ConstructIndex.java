@@ -294,7 +294,7 @@ public class ConstructIndex extends Configured implements Tool  {
 
 	
 	@Override
-	public int run(String[] args) throws Exception {
+	public int run(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
 		if(args.length != 2) {
 			System.err.printf("Usage: %s [generic options] <input> <output>\n", getClass().getSimpleName());
 			ToolRunner.printGenericCommandUsage(System.err);

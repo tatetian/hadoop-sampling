@@ -1,6 +1,6 @@
 package me.tatetian.hs.jobs.meancalculation;
 
-import me.tatetian.hs.io.SampledTextInputFormat;
+import me.tatetian.hs.io.IndexedTextInputFormat;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -18,6 +18,6 @@ public class CalculateMeanWithIndexedSampling extends CalculateMean {
 	protected void customConfiguration(Job job) {
 		Configuration conf = job.getConfiguration();
 		conf.setFloat("cps.sampling.ratio", samplingRatio);
-		job.setInputFormatClass(SampledTextInputFormat.class);
+		job.setInputFormatClass(IndexedTextInputFormat.class);
 	}
 }
