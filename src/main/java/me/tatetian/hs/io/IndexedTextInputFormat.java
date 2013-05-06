@@ -53,7 +53,7 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         // iterate blocks
 				long splitStart = 0; long splitLen = 0;
 				boolean hasBlocks = true;
-				while(hasBlocks) {	
+				while(hasBlocks) {
 					// combine blocks
 					int blockCount = 0;
 					while(blockCount < numBlocksCombined) {

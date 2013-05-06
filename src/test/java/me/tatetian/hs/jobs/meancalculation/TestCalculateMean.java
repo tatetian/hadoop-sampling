@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 
 import me.tatetian.hs.dataset.DataSet;
 import me.tatetian.hs.dataset.DataSetFactory;
@@ -25,11 +24,15 @@ public class TestCalculateMean {
   protected Path output;
   protected FileSystem fs;
   
+	// For the convenience of test, it's desirable to have block size smaller
+//	private static final int BLOCK_SIZE = 8 * 1024 * 1024;
+  
   @Before
   public void setup() throws IOException {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
+//    conf.setInt("dfs.blocksize", BLOCK_SIZE);
     
     input = new Path("tmp/test_mean_calculation.data");
     output = new Path("tmp/mean_output");
@@ -38,6 +41,8 @@ public class TestCalculateMean {
     // overwrite input file
     double mean = 80, sd = 40; 
 		DataSet dataSet = DataSetFactory.makeNormalDist(mean, sd);
+		dataSet.setNumReords(1000 * 1000 * 5);
+		//dataSet.setNumReords(1000 * 1000);
 		CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, input);
 		dataSet.dump(out);
 		// delete old output file

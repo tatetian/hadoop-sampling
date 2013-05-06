@@ -58,7 +58,7 @@ public class TestConstructIndexDriver {
   @Test
   public void test() throws Exception {
   	// Construct input on which the index will be built
-  	int numRecords = 1024;
+  	int numRecords = 1024 * 1024;
   	int averageSize = 256;
   	constructInput(numRecords, averageSize);
   	// Run index construction job

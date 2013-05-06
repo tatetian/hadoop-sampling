@@ -1,11 +1,13 @@
 package me.tatetian.hs.jobs.meancalculation;
 
+import me.tatetian.hs.io.Text;
+import me.tatetian.hs.io.TextInputFormat;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -24,6 +26,7 @@ public class CalculateMean extends Configured implements Tool {
 		Configuration conf = getConf();
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
+    job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(CalculateMeanMapper.class);
     job.setReducerClass(CalculateMeanReducer.class);
     job.setCombinerClass(CalculateMeanCombiner.class);

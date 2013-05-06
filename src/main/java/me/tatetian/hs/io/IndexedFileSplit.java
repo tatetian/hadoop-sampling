@@ -37,7 +37,7 @@ public class IndexedFileSplit extends FileSplit {
 				throw new IllegalArgumentException("No information about index meta is given");
 			// Check start
 			if(start != metas[0].dataBlockOffset)
-				throw new IllegalArgumentException("Start of file split is inconsistent with index meta");
+				throw new IllegalArgumentException("Start of file split is inconsistent with index meta: " + start + "!=" + metas[0].dataBlockOffset);
 			// Check length
 			long realLen = 0;
 			for(int i = 0; i < metas.length; i++)

@@ -8,8 +8,6 @@ import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 
 public class TestCalculateMeanWithIndexedSampling extends TestCalculateMean {
-	// For the convenience of test, it's desirable to have block size smaller
-	private static final int BLOCK_SIZE = 8 * 1024 * 1024;
 	
 	@Override
 	protected CalculateMean getCalculateMeanInstance() {
@@ -21,8 +19,6 @@ public class TestCalculateMeanWithIndexedSampling extends TestCalculateMean {
 	}
 	
 	private void constructIndex() {
-    conf.setInt("dfs.blocksize", BLOCK_SIZE);
-		
 		// Remove old output
 		Path output = new Path("tmp/test_mean_calculation_construct_index"); 
     try {
