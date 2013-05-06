@@ -3,6 +3,7 @@ package me.tatetian.hs.jobs.meancalculation;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.tatetian.hs.io.Text;
 import me.tatetian.hs.jobs.meancalculation.CalculateMeanMapper;
 import me.tatetian.hs.jobs.meancalculation.CalculateMeanReducer;
 import me.tatetian.hs.jobs.meancalculation.Pair;
@@ -10,7 +11,6 @@ import me.tatetian.hs.jobs.meancalculation.Pair;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.junit.Before;

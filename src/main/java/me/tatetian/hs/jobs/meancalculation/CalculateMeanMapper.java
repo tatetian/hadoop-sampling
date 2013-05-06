@@ -2,9 +2,10 @@ package me.tatetian.hs.jobs.meancalculation;
 
 import java.io.IOException;
 
+import me.tatetian.hs.io.Text;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 public class CalculateMeanMapper extends Mapper<LongWritable, Text, NullWritable, Pair> {

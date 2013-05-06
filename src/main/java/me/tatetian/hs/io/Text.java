@@ -51,6 +51,8 @@ public class Text extends BinaryComparable
   
   private byte[] bytes;
   private int length;
+  
+  private boolean trimCR = false;
 
   public Text() {
     bytes = EMPTY_BYTES;
@@ -257,6 +259,10 @@ public class Text extends BinaryComparable
     }
   }
   
+  public void setTrimCR(boolean trimCR) {
+  	this.trimCR = trimCR;
+  }
+  
   /**
    * Used by IndexedRecordReader to read Text efficiently
    * 
@@ -266,6 +272,8 @@ public class Text extends BinaryComparable
   public void read(DataInput in, int newLength) throws IOException {
   	setCapacity(newLength, false);
   	in.readFully(bytes, 0, newLength);
+  	
+  	if(trimCR && bytes[newLength-1] == '\n') newLength--;
   	length = newLength;
   } 
   

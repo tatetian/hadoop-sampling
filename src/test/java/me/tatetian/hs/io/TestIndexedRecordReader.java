@@ -15,7 +15,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
@@ -45,6 +44,7 @@ public class TestIndexedRecordReader {
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
     conf.setInt("dfs.blocksize", BLOCK_SIZE);
+    conf.setFloat("cps.sampling.ratio", 1.0f);
     
     input = new Path("tmp/test_indexed_text_record_reader.data");
     
@@ -73,9 +73,8 @@ public class TestIndexedRecordReader {
 			for(int j = 0; j < len - 1; j++) 
 				sb.append('*');
 			String record = sb.toString();
-			out.write(record.getBytes());
+			out.write(record.getBytes());			
 			out.write('\n');
-			
 			recordsWritten.add(record);
 		}
 		// Close streams
@@ -95,6 +94,7 @@ public class TestIndexedRecordReader {
 	
 	private void readTextRecords(List<String> recordsRead) throws IOException, InterruptedException {
 		IndexedRecordReader reader = getIndexedRecordReader();
+		
 		Text record = null;
 		while(reader.nextKeyValue()) {
 			record = reader.getCurrentValue();
@@ -117,15 +117,19 @@ public class TestIndexedRecordReader {
 	}
 	
 	private IndexedRecordReader getIndexedRecordReader() throws IOException {
-		FileSystem fs = input.getFileSystem(conf);
-		FileStatus fss = fs.getFileStatus(input);
-		long length = fss.getLen();
-		long start  = 0;
-				
 		Job job = new Job(conf, "readTextRecords");
 		job.setJobID(new JobID("readTextRecords", 1));
-		IndexedRecordReader reader = new IndexedRecordReader();
-		reader.initialize(new FileSplit(input, start, length, null), 
+		
+		IndexedTextInputFormat format = new IndexedTextInputFormat();
+		IndexedTextInputFormat.setInputPaths(job, input);
+		boolean splitable = false; // make sure the whole file is a single split
+		List<InputSplit> splits = format.getSplits(job, splitable);
+		
+		assert(splits.size() == 1);
+		
+		boolean trimCR = true;
+		IndexedRecordReader reader = new IndexedRecordReader(trimCR);
+		reader.initialize(splits.get(0), 
 										  new TaskAttemptContextImpl(conf, //null) );
 										  		new TaskAttemptID(
 										  				new TaskID(job.getJobID(), TaskType.MAP, 1), 1)));

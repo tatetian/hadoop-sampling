@@ -9,6 +9,7 @@ import me.tatetian.hs.index.IndexFile;
 import me.tatetian.hs.index.IndexMeta;
 import me.tatetian.hs.index.IndexMetaFile;
 import me.tatetian.hs.index.IndexUtil;
+import me.tatetian.hs.sampler.SkipSampler;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -48,9 +49,19 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   private int currentRecord;
   private IndexFile.Reader indexReader;
   
+  private boolean trimCR;
+  
+  private SkipSampler sampler = null;
+  
   public IndexedRecordReader() {
-  	key = new LongWritable(-1);
-  	value = new Text();
+  	this(true);
+  }
+  
+  public IndexedRecordReader(boolean trimCR) {  	
+  	this.key = new LongWritable(-1);
+  	this.value = new Text();
+  	this.trimCR = trimCR;
+  	this.value.setTrimCR(trimCR);
   }
 
   public void initialize(InputSplit genericSplit,
@@ -75,9 +86,15 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
     indexMeta = split.getIndexMeta();
     Path indexFile = IndexUtil.getIndexPath(dataFile);
     currentBlock = 0;
+    indexReader = new IndexFile.Reader(conf, indexFile);
     long indexStart = indexMeta[currentBlock].indexBlockOffset;
-    indexReader = new IndexFile.Reader(conf, indexFile, indexStart);
-   
+    indexReader.seek(indexStart);
+    currentIndex = Index.createIndex(conf);
+    
+    // Init sampler
+    double samplingRatio = conf.getFloat("cps.sampling.ratio", 1.0f);
+    sampler = new SkipSampler(samplingRatio);
+    
     // Ready to read records
     numBlocks = indexMeta.length;
     currentRecord = currentBlockSize = 0;
@@ -98,17 +115,8 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   }
   
   public boolean nextKeyValue() throws IOException {
-  	if(currentRecord >= currentBlockSize && !readNextBlock() )
-  		return false;
-  	
-  	key.set(pos);
-  	int recordLen = currentIndex.get(currentRecord);
-  	value.read(in, recordLen);
-  	
-  	currentRecord ++;
-  	pos += recordLen;
-  	
-  	return true;
+  	int skipped = sampler.next();
+  	return nextKeyValue(skipped);
   }
   
   public boolean nextKeyValue(int skipped) throws IOException {
@@ -122,12 +130,28 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
 	  	currentRecord++;
 	  	skipped--;
   	}
-  	if(skippedBytes >= 0) {
+  	if(skippedBytes > 0) {
   		pos += skippedBytes;
+  		if(pos >= end)
+  			pos = end;
   		in.seek(pos);
   	}
   	
-  	return nextKeyValue();
+  	return _nextKeyValue();
+  }
+  
+  private boolean _nextKeyValue() throws IOException {
+		if(currentRecord >= currentBlockSize && !readNextBlock() )
+  		return false;
+  	
+  	key.set(pos);
+  	int recordLen = currentIndex.get(currentRecord);
+  	value.read(in, recordLen);
+  	
+  	currentRecord ++;
+  	pos += recordLen;
+  	
+  	return true;
   }
 
   @Override

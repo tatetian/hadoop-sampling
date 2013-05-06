@@ -27,6 +27,10 @@ public abstract class AbstractIndexReader<V> implements java.io.Closeable  {
 	public boolean next(V val) throws IOException {
 		return reader.next(blockId, (Writable)val);
 	}
+
+	public void seek(long pos) throws IOException {
+		reader.seek(pos);
+	}
 	
 	public long getPosition() throws IOException {
 		return reader.getPosition();

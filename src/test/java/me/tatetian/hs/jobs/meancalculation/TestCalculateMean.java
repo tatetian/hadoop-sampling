@@ -20,10 +20,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestCalculateMean {
-  private Configuration conf;
-  private Path input;
-  private Path output;
-  private FileSystem fs;
+  protected Configuration conf;
+  protected Path input;
+  protected Path output;
+  protected FileSystem fs;
   
   @Before
   public void setup() throws IOException {
@@ -31,7 +31,7 @@ public class TestCalculateMean {
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
     
-    input = new Path("tmp/test_mean_dataset.data");
+    input = new Path("tmp/test_mean_calculation.data");
     output = new Path("tmp/mean_output");
     	
     fs = FileSystem.getLocal(conf);
