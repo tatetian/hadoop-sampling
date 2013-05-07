@@ -53,6 +53,8 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   
   private SkipSampler sampler = null;
   
+  private boolean optimal = true;
+  
   public IndexedRecordReader() {
   	this(true);
   }
@@ -103,17 +105,21 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   private boolean readNextBlock() throws IOException {
   	if(currentBlock >= numBlocks) 
   		return false;
-  	
+  
   	indexReader.next(currentIndex);
   	currentBlockSize = currentIndex.size();
+  	if(optimal) {
+  		in.seek(indexMeta[currentBlock].dataBlockOffset);
+  		currentBlockSize *= sampler.getRatio();
+  	}
   	currentRecord = 0;
-  	
+  
   	currentBlock ++;
   	return true;
   }
   
   public boolean nextKeyValue() throws IOException {
-  	int skipped = sampler.next();
+  	int skipped = optimal ? 0 : sampler.next();
   	return nextKeyValue(skipped);
   }
   

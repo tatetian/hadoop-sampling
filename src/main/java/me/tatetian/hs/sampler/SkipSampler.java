@@ -31,4 +31,8 @@ public class SkipSampler {
 	public double getStdVar(int popSize) {
 		return Math.sqrt( popSize * p * (1-p) );
 	}
+	
+	public double getRatio() {
+		return p;
+	}
 }
