@@ -8,9 +8,6 @@ import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.Progressable;
-import org.apache.hadoop.util.ReflectionUtils;
-
-import com.sun.jersey.core.reflection.ReflectionHelper;
 
 public class AbstractIndexWriter<V>  implements java.io.Closeable, Syncable {
 	private SequenceFile.Writer writer = null;
