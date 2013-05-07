@@ -45,7 +45,8 @@ public class TestConstructIndexDriver {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
-    conf.setInt("dfs.blocksize", BLOCK_SIZE);
+    // TODO: this parameter seems not to take effect
+    conf.setInt("fs.local.block.size", BLOCK_SIZE);
     
     input = new Path("tmp/test_construct_index.data");
     output = new Path("tmp/test_construct_index"); 
@@ -97,7 +98,7 @@ public class TestConstructIndexDriver {
 		inputReader			= FileUtil.readTextFile(input, conf);
 		indexReader 		= new IndexFile.Reader(conf, indexPath);
 		indexMetaReader = new IndexMetaFile.Reader(conf, indexMetaPath);
-		Index index 		= new Index(BLOCK_SIZE / 16);
+		Index index 		= new Index(BLOCK_SIZE / 8);
 		IndexMeta meta  = new IndexMeta();
 		// Iterate blocks
 		long dataBlockOffset = 0;

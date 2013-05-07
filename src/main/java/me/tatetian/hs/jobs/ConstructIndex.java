@@ -146,9 +146,12 @@ public class ConstructIndex extends Configured implements Tool  {
 		private InputSplitSummary inputSplitSummary = null;
 		private IndexMeta meta = null;
 		private Index index = null;
+		private long realStart = -1;	// Note: start of split is not the position of first record
 		
 		@Override
 		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+			if(realStart < 0) realStart = key.get();
+			
 			String line = value.toString();
 			int recordLen = line.length() + 1;
 			meta.dataBlockLen += recordLen;
@@ -165,14 +168,12 @@ public class ConstructIndex extends Configured implements Tool  {
 			// Get input file info
 	  	FileSplit inputSplit 	= (FileSplit) context.getInputSplit();
 			Path inputFile 				= inputSplit.getPath();
-	  	long start 						= inputSplit.getStart();
 	  	// Init meta
 	  	meta  = new IndexMeta();
-	  	meta.dataBlockOffset 	= start;
 	  	// Init index
 	  	index = Index.createIndex(conf);
 	  	// Init intermediate results
-	  	inputSplitMeta 		= new InputSplitMeta(inputFile.toString(), start);
+	  	inputSplitMeta 		= new InputSplitMeta(inputFile.toString(), realStart);
 	  	inputSplitSummary = new InputSplitSummary(meta, index);
 	  }
 	  
@@ -181,6 +182,11 @@ public class ConstructIndex extends Configured implements Tool  {
 	   */		
 		@Override
 	  protected void cleanup(Context context) throws IOException, InterruptedException {
+			if(realStart < 0) return;
+			
+			meta.dataBlockOffset 	= realStart;
+			inputSplitMeta.setStart(realStart);
+			
 			meta.indexBlockOffset = -1;			// determine later in reducer
 			meta.indexBlockLen = -1;				// determine later in reducer
 			// write intermidate result
@@ -225,7 +231,7 @@ public class ConstructIndex extends Configured implements Tool  {
 			String currentInputFile = key.getFileName();
 			long currentStart = key.getStart();
 			// Prepare to write to new meta & index file
-			if(currentInputFile != lastInputFile) {
+			if(!currentInputFile.equals(lastInputFile) ){
 				Path inputPath 				= new Path(currentInputFile);
 				Path indexOutputPath 	= IndexUtil.getIndexPath(inputPath);
 				Path metaOutputPath 	= IndexUtil.getIndexMetaPath(inputPath);
@@ -254,6 +260,7 @@ public class ConstructIndex extends Configured implements Tool  {
 				assert(summary == null);
 				
 				summary = summaryIter.next();
+				// TODO: figure out why indexBlockOffset is always 129!!!
 				long indexBlockOffset = indexWriter.getPosition();
 				index 	= summary.getIndex();
 				meta		= summary.getIndexMeta();
