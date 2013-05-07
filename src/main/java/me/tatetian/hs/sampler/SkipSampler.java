@@ -6,19 +6,22 @@ public class SkipSampler {
 	private double p;
 	private Random random = new Random();
 	
+  private int skip;
 	
 	public SkipSampler(double p) {
 		if(p < 0 || p > 1) throw new IllegalArgumentException("Probablity p must be within [0, 1]");
 		
 		this.p = p;
+    skip = (int) Math.ceil(1 / p);
 	}
 	
 	public int next() {
-		int skip = 0;
+	/*	int skip = 0;
 		while(random.nextDouble() > p) {
 			skip ++;
 		}
-		return skip;
+		return skip;*/
+    return skip;
 	}
 	
 	public double getExpectedSampleSize(int popSize) {

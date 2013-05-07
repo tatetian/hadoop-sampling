@@ -42,12 +42,11 @@ public class TestCalculateMean {
     	
     fs = FileSystem.getLocal(conf);
     // overwrite input file
-    double mean = 80, sd = 40; 
-		DataSet dataSet = DataSetFactory.makeNormalDist(mean, sd);
-		dataSet.setNumReords(1000 * 1000 * 50);
-		//dataSet.setNumReords(1000 * 1000);
-		CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, input);
-		dataSet.dump(out);
+    //double mean = 80, sd = 40; 
+		//DataSet dataSet = DataSetFactory.makeNormalDist(mean, sd);
+		//dataSet.setNumReords(1000 * 1000 * 50 * 8);
+		//CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, input);
+		//dataSet.dump(out);
 		// delete old output file
     fs.delete(output, true);
   }

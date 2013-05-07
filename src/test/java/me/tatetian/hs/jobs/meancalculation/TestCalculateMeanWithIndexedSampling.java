@@ -11,9 +11,9 @@ public class TestCalculateMeanWithIndexedSampling extends TestCalculateMean {
 	
 	@Override
 	protected CalculateMean getCalculateMeanInstance() {
-		constructIndex();
+		//constructIndex();
  	
-		float samplingRatio = 0.05f;
+		float samplingRatio = 0.01f;
 		conf.setFloat("cps.sampling.ratio", samplingRatio);
 		return new CalculateMeanWithIndexedSampling(samplingRatio);
 	}

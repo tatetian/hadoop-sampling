@@ -13,7 +13,7 @@ public class CalculateMeanWithNaiveSampling extends CalculateMean {
 	@Override
 	protected void customConfiguration(Job job) {	
 		Configuration conf = job.getConfiguration();
-		conf.setFloat("cps.sapmling.ratio", samplingRatio);
+		conf.setFloat("cps.sampling.ratio", samplingRatio);
 		
 		job.setMapperClass(CalculateMeanMapperWithNaiveSampling.class);
 	}

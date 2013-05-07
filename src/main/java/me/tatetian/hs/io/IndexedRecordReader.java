@@ -108,8 +108,6 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   	currentBlockSize = currentIndex.size();
   	currentRecord = 0;
   	
-  	assert(pos == indexMeta[currentBlock].dataBlockOffset);
-  	
   	currentBlock ++;
   	return true;
   }
