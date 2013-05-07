@@ -53,7 +53,7 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   
   private SkipSampler sampler = null;
   
-  private boolean optimal = true;
+  private static final boolean optimal = false;
   
   public IndexedRecordReader() {
   	this(true);
