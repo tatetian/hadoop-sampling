@@ -33,7 +33,7 @@ import org.junit.Test;
 
 public class TestConstructIndexDriver {
 	// For the convenience of test, it's desirable to have block size smaller
-	private static final int BLOCK_SIZE = 8 * 1024 * 1024;
+	private static final int BLOCK_SIZE = 32 * 1024 * 1024;
 	
 	private Configuration conf;
   private Path input;
