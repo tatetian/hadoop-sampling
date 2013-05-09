@@ -327,15 +327,12 @@ public class ConstructIndex extends Configured implements Tool  {
     // TODO: change outputDir
     Path outputDir = new Path(args[1]);
     FileOutputFormat.setOutputPath(job, outputDir);
+    // Remove old output
     Path[] indexOutputPaths = getIndexOutputPaths(job);
     Path[] indexMetaOutputPaths = getIndexMetaOutputPaths(job);
     removePaths(indexOutputPaths, conf);
     removePaths(indexMetaOutputPaths, conf);
-    MultipleOutputs.addNamedOutput(job, "meta", SequenceFileOutputFormat.class, 
-    															 IntWritable.class, IndexMeta.class);    
-    MultipleOutputs.addNamedOutput(job, "index", SequenceFileOutputFormat.class, 
-    															 IntWritable.class, Index.class);
-    
+   
 		int success = (job.waitForCompletion(true) ? 0 : 1);
 	
 		return success;
