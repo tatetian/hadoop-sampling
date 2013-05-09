@@ -21,9 +21,10 @@ public class CalculateMeanMapperWithNaiveSampling extends Mapper<LongWritable, T
 	@Override
 	protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		if(random.nextFloat() < samplingRatio) {
-			String line = value.toString();
+			//String line = value.toString();
 			count ++;
-			sum += Double.parseDouble(line);
+			//sum += Double.parseDouble(line);
+			sum += value.getLength();
 		}
 	}
 

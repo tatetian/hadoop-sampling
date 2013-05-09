@@ -260,7 +260,6 @@ public class ConstructIndex extends Configured implements Tool  {
 				assert(summary == null);
 				
 				summary = summaryIter.next();
-				// TODO: figure out why indexBlockOffset is always 129!!!
 				long indexBlockOffset = indexWriter.getPosition();
 				index 	= summary.getIndex();
 				meta		= summary.getIndexMeta();
