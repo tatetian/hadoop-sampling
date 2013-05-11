@@ -3,30 +3,19 @@ package me.tatetian.hs.jobs;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import me.tatetian.hs.dataset.DataSet;
-import me.tatetian.hs.dataset.DataSetFactory;
 import me.tatetian.hs.index.Index;
 import me.tatetian.hs.index.IndexFile;
 import me.tatetian.hs.index.IndexMeta;
 import me.tatetian.hs.index.IndexMetaFile;
 import me.tatetian.hs.index.IndexUtil;
 import me.tatetian.hs.io.FileUtil;
-import me.tatetian.hs.jobs.ConstructIndex.ConstructIndexMapper;
-import me.tatetian.hs.jobs.ConstructIndex.ConstructIndexReducer;
-import me.tatetian.hs.jobs.ConstructIndex.InputSplitMeta;
-import me.tatetian.hs.jobs.ConstructIndex.InputSplitSummary;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils.NullOutputStream;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mrunit.mapreduce.MapDriver;
-import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,11 +64,13 @@ public class TestConstructIndexDriver {
   	// Create input file
 		FSDataOutputStream out = FileUtil.createFile(input, conf);
 		// The sizes of record follow normal distribution
-		NormalDistribution sizeDist = new NormalDistribution(averageSize, 0.5*averageSize);
+		
+		RandomDataImpl sizeDist = new RandomDataImpl();
 		// Write records of input file
 		for(int i = 0; i < numRecords; i++) {
+			double size = sizeDist.nextGaussian(averageSize, 0.5 * averageSize);
 			// write a record of random size
-			int recordSize = Math.max( 1, (int) Math.ceil(sizeDist.sample()) );
+			int recordSize = Math.max( 1, (int) Math.ceil(size) );
 			for(int j = 0; j < recordSize; j++)
 				out.write('*');
 			out.write('\n');

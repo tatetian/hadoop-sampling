@@ -1,6 +1,5 @@
 package me.tatetian.hs.dataset;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FSDataOutputStream;

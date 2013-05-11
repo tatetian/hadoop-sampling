@@ -1,7 +1,6 @@
 package me.tatetian.hs.dataset;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.math.random.RandomDataImpl;
 
 public class DataSetFactory {
 	public static DataSet makeRepeatedString() {
@@ -14,21 +13,18 @@ public class DataSetFactory {
 	
 	public static DataSet makeNormalDist(double mean, double sd) {
 		FieldGenerator[] fieldGenerators = new FieldGenerator[]{ 
-				new RealGenerator(new NormalDistribution(mean, sd))
+				new RealGenerator(mean, sd)
 		};
 		return new DataSet(fieldGenerators);
 	}
 	
 	private static class RealGenerator implements FieldGenerator {
 		private byte[] buff = new byte[100];
-		private RealDistribution dist = null;
+		private double mean, sd;
+		private RandomDataImpl random = null;
 		
-		public RealGenerator(RealDistribution dist) {
-			this.dist = dist;
-		}
-		
-		public RealDistribution getDistribution() {
-			return dist;
+		public RealGenerator(double mean, double sd) {
+			this.random = new RandomDataImpl();
 		}
 		
 		@Override
@@ -56,7 +52,7 @@ public class DataSetFactory {
 
 		@Override
 		public String nextString() {
-			double value = dist.sample();
+			double value = random.nextGaussian(mean, sd);
 			return Double.toString(value);
 		}
 	}
