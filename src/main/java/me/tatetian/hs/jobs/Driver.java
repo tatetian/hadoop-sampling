@@ -20,13 +20,19 @@ public class Driver {
     	pgd.addClass("index", ConstructIndex.class, 
                    "Construct sampling index of a text data file");
     	// e.g. hadoop jar hadoop-sampling-2.0.3-alpha.jar \
-    	//								 sample /hs/
+    	//								 sample /hs/mean.data /hs/mean_sample_output
       pgd.addClass("sample", ExtractSample.class, 
                    "Extract sample from an indexed data file");
+      // e.g. hadoop jar hadoop-sampling-2.0.3-alpha.jar \
+      //								 mean0 /hs/mean.data /hs/mean_output
       pgd.addClass("mean0", CalculateMean.class, 
                    "Calculate mean of dataset");
+      // e.g. hadoop jar hadoop-sampling-2.0.3-alpha.jar \
+      //								 mean1 /hs/mean.data /hs/mean_output 0.01
       pgd.addClass("mean1", CalculateMeanWithNaiveSampling.class, 
                    "Calculate mean of dataset with naive sampling");
+      // e.g. hadoop jar hadoop-sampling-2.0.3-alpha.jar \
+      //								 mean2 /hs/mean.data /hs/mean_output 0.01
       pgd.addClass("mean2", CalculateMeanWithIndexedSampling.class, 
                    "Calculate mean of dataset with indexed sampling");
       exitCode = pgd.driver(argv);

@@ -27,6 +27,8 @@ public class TestCalculateMean {
   protected Path output;
   protected FileSystem fs;
   
+  protected float samplingRatio = -1;
+  
 	// For the convenience of test, it's desirable to have block size smaller
 //	private static final int BLOCK_SIZE = 8 * 1024 * 1024;
   
@@ -56,7 +58,16 @@ public class TestCalculateMean {
   	CalculateMean calculateMean = getCalculateMeanInstance(); 
   	calculateMean.setConf(conf);
     
-    int exitCode = calculateMean.run(new String[] {input.toString(), output.toString()});
+  	String[] args = null;
+  	if(samplingRatio > 0) {
+  		args = new String[] {
+    		input.toString(), output.toString(), Float.toString(samplingRatio)
+  		};
+  	}
+  	else {
+  		args = new String[] { input.toString(), output.toString() };
+  	}
+    int exitCode = calculateMean.run(args);
     Assert.assertEquals(0, exitCode);
     
     validateOuput();

@@ -11,11 +11,11 @@ public class TestCalculateMeanWithIndexedSampling extends TestCalculateMean {
 	
 	@Override
 	protected CalculateMean getCalculateMeanInstance() {
+		samplingRatio = 0.01f;
+		
 		//constructIndex();
  	
-		float samplingRatio = 0.01f;
-		conf.setFloat("cps.sampling.ratio", samplingRatio);
-		return new CalculateMeanWithIndexedSampling(samplingRatio);
+		return new CalculateMeanWithIndexedSampling();
 	}
 	
 	private void constructIndex() {

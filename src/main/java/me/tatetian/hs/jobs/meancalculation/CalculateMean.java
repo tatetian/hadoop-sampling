@@ -15,15 +15,29 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class CalculateMean extends Configured implements Tool {
+	private float samplingRatio = -1;
+	
 	@Override
 	public int run(String[] args) throws Exception {
-		if(args.length != 2) {
-			System.err.printf("Usage: %s [generic options] <input> <output>\n", getClass().getSimpleName());
+		if(args.length != 2 || args.length != 3) {
+			System.err.printf("mean <input> <output> [<sampling_ratio>]\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
 		
+		if(args.length == 3) {
+			samplingRatio = Float.parseFloat(args[2]);
+			if(samplingRatio <= 0 || samplingRatio > 1) {
+				System.err.println("<sampling_ratio> must be between 0 and 1");
+				return -1;
+			}
+		}
+		
 		Configuration conf = getConf();
+		if(samplingRatio > 0) {
+			conf.setFloat("cps.sampling.ratio", samplingRatio);
+		}
+		
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
     job.setInputFormatClass(TextInputFormat.class);
