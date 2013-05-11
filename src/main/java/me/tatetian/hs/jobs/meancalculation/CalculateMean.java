@@ -19,7 +19,7 @@ public class CalculateMean extends Configured implements Tool {
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		if(args.length != 2 || args.length != 3) {
+		if(args.length != 2 && args.length != 3) {
 			System.err.printf("mean <input> <output> [<sampling_ratio>]\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
