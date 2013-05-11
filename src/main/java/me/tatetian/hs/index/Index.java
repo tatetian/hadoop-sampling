@@ -19,8 +19,8 @@ public class Index implements Writable {
 	} 
 	
 	private static int getMaxIndexSize(Configuration conf) {
-		 int blockSize = conf.getInt("dfs.blocksize", 16 * 1024 * 1024); 
-		 return conf.getInt("cps.indexing.size.max", blockSize);
+		 int blockSize = conf.getInt("dfs.blocksize", 32 * 1024 * 1024); 
+		 return conf.getInt("cps.indexing.size.max", blockSize) / 8;
 	}
 	
 	public Index(int maxSize) {

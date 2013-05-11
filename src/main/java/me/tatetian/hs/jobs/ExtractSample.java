@@ -38,14 +38,23 @@ public class ExtractSample  extends Configured implements Tool {
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		if(args.length != 2) {
-			System.err.printf("Usage: %s [generic options] <input> <output>\n", getClass().getSimpleName());
+		if(args.length != 3) {
+			System.err.printf("sample <sampling_ratio> <input> <output>\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
-	
+
+		float samplingRatio = Float.parseFloat(args[0]);
+		if(samplingRatio < 0 || samplingRatio > 1) {
+			System.err.printf("<sampling_ratio> must be between 0 and 1");
+			ToolRunner.printGenericCommandUsage(System.err);
+			return -1;
+		}
+		
 		// Job
 		Configuration conf = getConf();
+		conf.setFloat("cps.sampling.ratio", samplingRatio);
+		
 		Job job = new Job(conf, "Sample Extraction");
     job.setJarByClass(ExtractSample.class);
     job.setInputFormatClass(IndexedTextInputFormat.class);
@@ -56,11 +65,11 @@ public class ExtractSample  extends Configured implements Tool {
     job.setOutputKeyClass(NullWritable.class);
     job.setOutputValueClass(Text.class);
     // Input
-    Path input = new Path(args[0]);
+    Path input = new Path(args[1]);
     FileInputFormat.addInputPath(job,input);
     // Output
     // TODO: change outputDir
-    Path outputDir = new Path(args[1]);
+    Path outputDir = new Path(args[2]);
     FileOutputFormat.setOutputPath(job, outputDir);
    
 		int success = (job.waitForCompletion(true) ? 0 : 1);

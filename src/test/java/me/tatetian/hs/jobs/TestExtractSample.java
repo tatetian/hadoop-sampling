@@ -32,7 +32,6 @@ public class TestExtractSample {
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
     conf.setInt("fs.local.block.size", BLOCK_SIZE);
-    conf.setFloat("cps.sampling.ratio", SAMPLING_RATIO);
     
     input = new Path("tmp/test_mean_calculation.data");
     output = new Path("tmp/sample_output");
@@ -53,7 +52,10 @@ public class TestExtractSample {
   	ExtractSample constructSample = new ExtractSample();
   	constructSample.setConf(conf);
     
-    int exitCode = constructSample.run(new String[] {input.toString(), output.toString()});
+    int exitCode = constructSample.run(new String[] {
+    																			Float.toString(SAMPLING_RATIO),
+    																			input.toString(), 
+    																			output.toString()});
     Assert.assertEquals(0, exitCode);
     
     validateOutput();

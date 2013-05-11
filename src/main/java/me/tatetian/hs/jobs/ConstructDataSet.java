@@ -25,7 +25,7 @@ public class ConstructDataSet  extends Configured implements Tool  {
 		int 	 numRecords = Integer.parseInt(args[2]);
 		Path	 outputPath = new Path(args[3]);
 		
-		DataSet dataSet = DataSetFactory.makeNormalDist(mean, sd);
+		DataSet dataSet = DataSetFactory.makeNormalDistOfMultipleFields(mean, sd);
 		dataSet.setNumReords(numRecords);
 		FSDataOutputStream out = FileUtil.createFile(outputPath, getConf());
 		dataSet.dump(out);

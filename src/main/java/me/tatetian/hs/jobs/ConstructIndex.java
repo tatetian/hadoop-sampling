@@ -302,8 +302,8 @@ public class ConstructIndex extends Configured implements Tool  {
 	@Override
 	public int run(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
 		if(args.length != 2) {
-			System.err.printf("Usage: %s [generic options] <input> <output>\n", getClass().getSimpleName());
-			ToolRunner.printGenericCommandUsage(System.err);
+      System.out.println("dataset <input> <output>");
+      ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
 	
@@ -313,7 +313,6 @@ public class ConstructIndex extends Configured implements Tool  {
     job.setJarByClass(ConstructIndex.class);
     job.setMapperClass(ConstructIndexMapper.class);
     job.setReducerClass(ConstructIndexReducer.class);
-    //job.setCombinerClass(ConstructIndexReducer.class);
     job.setMapOutputKeyClass(InputSplitMeta.class);
     job.setMapOutputValueClass(InputSplitSummary.class);
     job.setPartitionerClass(ConstructIndexPartitioner.class);
@@ -358,18 +357,6 @@ public class ConstructIndex extends Configured implements Tool  {
 		
 		FileSystem fs = paths[0].getFileSystem(conf);
 		for(Path p : paths) fs.delete(p, false);
-	}
-	
-	private boolean renamePaths(Path[] paths, Configuration conf) throws IOException {
-		if(paths == null || paths.length == 0) return false;
-		
-		FileSystem fs = paths[0].getFileSystem(conf);
-		for(Path p : paths) {
-			FileStatus[] samePrefix = fs.globStatus(p.suffix("-*"));
-			if(samePrefix.length != 1) return false;	// we expect exact one output file
-			fs.rename(samePrefix[0].getPath(), p);
-		}
-		return true;
 	}
 
 	public static void main(String[] args) throws Exception {

@@ -18,6 +18,20 @@ public class DataSetFactory {
 		return new DataSet(fieldGenerators);
 	}
 	
+	public static DataSet makeNormalDistOfMultipleFields(double mean, double sd) {
+		FieldGenerator[] fieldGenerators = new FieldGenerator[]{ 
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd),
+				new RealGenerator(mean, sd)
+		};
+		return new DataSet(fieldGenerators);
+	}
+	
 	private static class RealGenerator implements FieldGenerator {
 		private byte[] buff = new byte[100];
 		private double mean, sd;
