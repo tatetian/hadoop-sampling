@@ -44,7 +44,7 @@ public class ExtractSample  extends Configured implements Tool {
 			return -1;
 		}
 
-		float samplingRatio = Float.parseFloat(args[0]);
+		float samplingRatio = Float.parseFloat(args[2]);
 		if(samplingRatio < 0 || samplingRatio > 1) {
 			System.err.printf("<sampling_ratio> must be between 0 and 1");
 			ToolRunner.printGenericCommandUsage(System.err);
@@ -65,11 +65,11 @@ public class ExtractSample  extends Configured implements Tool {
     job.setOutputKeyClass(NullWritable.class);
     job.setOutputValueClass(Text.class);
     // Input
-    Path input = new Path(args[1]);
+    Path input = new Path(args[0]);
     FileInputFormat.addInputPath(job,input);
     // Output
     // TODO: change outputDir
-    Path outputDir = new Path(args[2]);
+    Path outputDir = new Path(args[1]);
     FileOutputFormat.setOutputPath(job, outputDir);
    
 		int success = (job.waitForCompletion(true) ? 0 : 1);

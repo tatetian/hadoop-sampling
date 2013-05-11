@@ -20,7 +20,7 @@ public class Driver {
     	pgd.addClass("index", ConstructIndex.class, 
                    "Construct sampling index of a text data file");
     	// e.g. hadoop jar hadoop-sampling-2.0.3-alpha.jar \
-    	//								 sample /hs/mean.data /hs/mean_sample_output
+    	//								 sample /hs/mean.data /hs/mean_sample_output 0.01
       pgd.addClass("sample", ExtractSample.class, 
                    "Extract sample from an indexed data file");
       // e.g. hadoop jar hadoop-sampling-2.0.3-alpha.jar \
