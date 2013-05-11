@@ -25,6 +25,8 @@ public class DataSetFactory {
 		
 		public RealGenerator(double mean, double sd) {
 			this.random = new RandomDataImpl();
+			this.mean = mean;
+			this.sd = sd;
 		}
 		
 		@Override

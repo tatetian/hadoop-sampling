@@ -9,7 +9,7 @@ import me.tatetian.hs.index.IndexMetaFile;
 import me.tatetian.hs.index.IndexUtil;
 import me.tatetian.hs.jobs.ConstructIndex;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -66,9 +66,9 @@ public class TestIndexedRecordReader {
 		FSDataOutputStream out = FileUtil.createFile(input, conf);
 		// Write data and create index
 		double avgLen = 100; double sdLen = 50;
-		NormalDistribution lenDist = new NormalDistribution(avgLen, sdLen);
+		RandomDataImpl random = new RandomDataImpl();
 		for(int i = 0; i < numRecords; i++) {
-			int len = (int) Math.ceil(lenDist.sample());
+			int len = (int) Math.ceil(random.nextGaussian(avgLen, sdLen));
 			StringBuilder sb = new StringBuilder();
 			for(int j = 0; j < len - 1; j++) 
 				sb.append('*');
