@@ -61,6 +61,9 @@ public class CalculateMean extends Configured implements Tool {
 	
 	protected void customConfiguration(Job job) {
 		// no operation
+		String msg = "!!!!!!with basic!!!!!!";
+		System.out.println(msg);
+		System.err.println(msg);
 	}
 	
 	public static void main(String[] args) throws Exception {
