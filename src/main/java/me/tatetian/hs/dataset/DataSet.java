@@ -33,14 +33,18 @@ public class DataSet {
 	}
 	
 	public void dump(FSDataOutputStream out) throws IOException {
-		for(int i = 0; i < numRecords; i++) {
-			for(int j = 0; j < fieldGenerators.length; j++) {
-				if(j != 0) out.write('\t');
-				out.write(fieldGenerators[j].next());
+		try {
+			for(int i = 0; i < numRecords; i++) {
+				for(int j = 0; j < fieldGenerators.length; j++) {
+					if(j != 0) out.write('\t');
+					out.write(fieldGenerators[j].next());
+				}
+				out.writeByte('\n');
 			}
-			out.writeByte('\n');
 		}
-		out.close();
+		finally {
+			out.close();
+		}
 	}
 
 	public void dump(CascadingSampledDataOutputStream out) throws IOException {

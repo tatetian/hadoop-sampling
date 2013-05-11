@@ -68,4 +68,8 @@ public class ExtractSample  extends Configured implements Tool {
 		return success;
 	}
 
+	public static void main(String[] args) throws Exception {
+    int res = ToolRunner.run(new Configuration(), new ExtractSample(), args);
+    System.exit(res);
+  }
 }

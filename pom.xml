@@ -225,7 +225,6 @@
       </plugins>
     </pluginManagement>
   
-  
 	   <plugins>
 	     <plugin>
 		     <groupId>org.apache.maven.plugins</groupId>
@@ -233,7 +232,7 @@
 		     <configuration>
 		       <archive>
 		         <manifest>
-		           <mainClass>org.apache.hadoop.examples.ExampleDriver</mainClass>
+		           <mainClass>me.tatetian.hs.jobs.Driver</mainClass>
 		         </manifest>
 		       </archive>
 		     </configuration>

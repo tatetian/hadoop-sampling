@@ -371,10 +371,9 @@ public class ConstructIndex extends Configured implements Tool  {
 		}
 		return true;
 	}
-	
+
 	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new CalculateMean(), args);
-		SequenceFileOutputFormat outputFormat = null;
-		System.exit(res);
-	}
+    int res = ToolRunner.run(new Configuration(), new ConstructIndex(), args);
+    System.exit(res);
+  }	
 }
