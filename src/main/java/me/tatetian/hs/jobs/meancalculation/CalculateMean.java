@@ -16,6 +16,8 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class CalculateMean extends Configured implements Tool {
+	private final boolean profiling = true;
+	
 	private float samplingRatio = -1;
 	
 	@Override
@@ -54,6 +56,13 @@ public class CalculateMean extends Configured implements Tool {
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(DoubleWritable.class);
     job.setNumReduceTasks(1);
+    
+    if(profiling) {
+	    job.setProfileEnabled(true);
+	    job.setProfileParams("-agentlib:hprof=cpu=samples,heap=sites,depth=6,force=n,thread=y,verbose=n,file=%s");
+	    job.setProfileTaskRange(true, "0-2");
+    }
+    
     Path input = new Path(args[0]);
     FileInputFormat.addInputPath(job,input);
     Path output = new Path(args[1]);
