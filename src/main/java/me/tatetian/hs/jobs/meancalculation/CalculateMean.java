@@ -6,6 +6,7 @@ import me.tatetian.hs.io.TextInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -37,6 +38,10 @@ public class CalculateMean extends Configured implements Tool {
 		if(samplingRatio > 0) {
 			conf.setFloat("cps.sampling.ratio", samplingRatio);
 		}
+		// Optimize DfsClient performance by enabling local reading shortcircuit
+		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY, true);
+		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_SKIP_CHECKSUM_KEY, true);
+		conf.setInt(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_BUFFER_SIZE_KEY, 1024 * 1024);
 		
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
