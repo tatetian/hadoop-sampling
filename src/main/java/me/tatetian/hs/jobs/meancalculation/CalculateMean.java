@@ -44,6 +44,7 @@ public class CalculateMean extends Configured implements Tool {
 		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY, true);
 		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_SKIP_CHECKSUM_KEY, true);
 		conf.setInt(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_BUFFER_SIZE_KEY, 1024 * 1024);
+		conf.setStrings(DFSConfigKeys.DFS_BLOCK_LOCAL_PATH_ACCESS_USER_KEY, "hduser");
 		
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
