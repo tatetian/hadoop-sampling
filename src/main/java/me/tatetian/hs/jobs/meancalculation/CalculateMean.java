@@ -16,7 +16,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class CalculateMean extends Configured implements Tool {
-	private final boolean profiling = true;
+	private final boolean profiling = false;
 	
 	private float samplingRatio = -1;
 	
@@ -40,11 +40,6 @@ public class CalculateMean extends Configured implements Tool {
 		if(samplingRatio > 0) {
 			conf.setFloat("cps.sampling.ratio", samplingRatio);
 		}
-		// Optimize DfsClient performance by enabling local reading shortcircuit
-		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY, true);
-		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_SKIP_CHECKSUM_KEY, true);
-		conf.setInt(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_BUFFER_SIZE_KEY, 1024 * 1024);
-		conf.setStrings(DFSConfigKeys.DFS_BLOCK_LOCAL_PATH_ACCESS_USER_KEY, "hduser");
 		
 		Job job = new Job(conf, "Mean Calculation");
     job.setJarByClass(CalculateMean.class);
