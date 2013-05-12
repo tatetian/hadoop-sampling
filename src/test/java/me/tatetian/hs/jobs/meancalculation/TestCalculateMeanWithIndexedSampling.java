@@ -13,7 +13,7 @@ public class TestCalculateMeanWithIndexedSampling extends TestCalculateMean {
 	protected CalculateMean getCalculateMeanInstance() {
 		samplingRatio = 0.01f;
 		
-		//constructIndex();
+		constructIndex();
  	
 		return new CalculateMeanWithIndexedSampling();
 	}
