@@ -1,5 +1,6 @@
 package me.tatetian.hs.jobs.meancalculation;
 
+import me.tatetian.hs.io.IOConfigKeys;
 import me.tatetian.hs.io.Text;
 import me.tatetian.hs.io.TextInputFormat;
 
@@ -38,7 +39,7 @@ public class CalculateMean extends Configured implements Tool {
 		
 		Configuration conf = getConf();
 		if(samplingRatio > 0) {
-			conf.setFloat("cps.sampling.ratio", samplingRatio);
+			conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, samplingRatio);
 		}
 		
 		Job job = new Job(conf, "Mean Calculation");

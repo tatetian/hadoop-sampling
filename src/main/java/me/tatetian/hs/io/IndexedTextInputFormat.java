@@ -36,7 +36,7 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
 		if(samplingRatio <= 0 || samplingRatio > 1)
 			throw new InvalidJobConfException("sampling ratio must be between 0 and 1");
     // TODO: decide best numBlocksCombined
-		int numBlocksCombined = splitable ? (int) Math.min(Math.floor(1/samplingRatio),8) :
+		int numBlocksCombined = splitable ? (int) Math.min(Math.floor(1/samplingRatio),12) :
 																				Integer.MAX_VALUE ;
     // generate splits
     List<InputSplit> splits = new ArrayList<InputSplit>();

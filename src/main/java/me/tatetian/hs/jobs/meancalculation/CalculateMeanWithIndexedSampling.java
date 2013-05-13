@@ -17,10 +17,12 @@ public class CalculateMeanWithIndexedSampling extends CalculateMean {
 		job.setInputFormatClass(IndexedTextInputFormat.class);
 
 		Configuration conf = job.getConfiguration();
+		
+    conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE, 2048 + 1024);
 		// Optimize DfsClient performance by enabling local reading shortcircuit
 		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY, true);
 		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_SKIP_CHECKSUM_KEY, true);
-		conf.setInt(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_BUFFER_SIZE_KEY, 256 + 128);
+		conf.setInt(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_BUFFER_SIZE_KEY, 4096);
 	}
 	
 	public static void main(String[] args) throws Exception {
