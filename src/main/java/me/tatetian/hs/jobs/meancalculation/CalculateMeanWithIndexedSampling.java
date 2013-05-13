@@ -1,5 +1,6 @@
 package me.tatetian.hs.jobs.meancalculation;
 
+import me.tatetian.hs.io.IOConfigKeys;
 import me.tatetian.hs.io.IndexedTextInputFormat;
 
 import org.apache.hadoop.conf.Configuration;

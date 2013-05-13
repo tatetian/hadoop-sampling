@@ -28,11 +28,11 @@ import org.apache.hadoop.mapreduce.v2.api.records.TaskAttemptId;
 import org.apache.hadoop.mapreduce.v2.api.records.TaskId;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestIndexedRecordReader {
 	private static final int numRecords = 2048;
-	private static final int BLOCK_SIZE = 8 * 1024 * 1024;
 	
 	private Configuration conf = null;
 	private Path input = null;
@@ -43,22 +43,34 @@ public class TestIndexedRecordReader {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
-    conf.setInt("dfs.blocksize", BLOCK_SIZE);
-    conf.setFloat("cps.sampling.ratio", 1.0f);
-    
-    input = new Path("tmp/test_indexed_text_record_reader.data");
     
     fs = FileSystem.getLocal(conf);
   }
 	
-	@Test
+	@Ignore @Test
 	public void test() throws IOException, InterruptedException, ClassNotFoundException {
+    input = new Path("tmp/test_indexed_record_reader.data");
+		
 		List<String> recordsWritten 	= new ArrayList<String>(),
 								 recordsRead			= new ArrayList<String>();
 		writeTextRecords(recordsWritten);
 		constructInputIndex();
 		readTextRecords(recordsRead);
 		validateResult(recordsWritten, recordsRead);
+	}
+	
+	@Test
+	public void perf() throws IOException {
+		input = new Path("tmp/test_mean_calculation.data");
+		
+    conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 0.01f);
+    conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE, 2048 + 1024);
+		
+		IndexedRecordReader reader = getIndexedRecordReader();
+		while(reader.nextKeyValue()) {
+			 reader.getCurrentValue();
+		}
+		reader.close();
 	}
 	
 	private void writeTextRecords(List<String> recordsWritten) throws IOException {

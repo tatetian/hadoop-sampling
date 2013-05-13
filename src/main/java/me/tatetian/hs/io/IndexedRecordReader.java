@@ -47,13 +47,16 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   private Index currentIndex;
   private int currentBlockSize;
   private int currentRecord;
+  private int chunkEnd;
   private IndexFile.Reader indexReader;
   
+  private int chunkSize = 4096;
+  private int chunkRead = 0; 
+  
+  // trim CR at end of record
   private boolean trimCR;
   
   private SkipSampler sampler = null;
-  
-  private static final boolean optimal = false;
   
   public IndexedRecordReader() {
   	this(true);
@@ -94,70 +97,77 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
     currentIndex = Index.createIndex(conf);
     
     // Init sampler
-    double samplingRatio = conf.getFloat("cps.sampling.ratio", 1.0f);
+    double samplingRatio = conf.getFloat(
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
     sampler = new SkipSampler(samplingRatio);
     
     // Ready to read records
+    chunkSize = conf.getInt(
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE, 
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE_DEFAULT);
+    chunkRead = Integer.MAX_VALUE;
     numBlocks = indexMeta.length;
     currentRecord = currentBlockSize = 0;
   }
   
-  private boolean readNextBlock() throws IOException {
+  private boolean nextBlock() throws IOException {
   	if(currentBlock >= numBlocks) 
   		return false;
   
   	indexReader.next(currentIndex);
+  	
   	currentBlockSize = currentIndex.size();
-  	if(optimal) {
-  		in.seek(indexMeta[currentBlock].dataBlockOffset);
-  		currentBlockSize *= sampler.getRatio();
-  	}
-  	currentRecord = 0;
+		currentRecord = 0;
   
   	currentBlock ++;
   	return true;
   }
   
   public boolean nextKeyValue() throws IOException {
-  	int skipped = optimal ? 0 : sampler.next();
-  	return nextKeyValue(skipped);
-  }
-  
-  public boolean nextKeyValue(int skipped) throws IOException {
-  	long skippedBytes = 0;
-  	while(skipped > 0) {
-	  	if(currentRecord >= currentBlockSize && !readNextBlock() )
-	  		return false;
-  		
-	  	skippedBytes += currentIndex.get(currentRecord);
-	  	
-	  	currentRecord++;
-	  	skipped--;
-  	}
-  	if(skippedBytes > 0) {
-  		pos += skippedBytes;
-  		if(pos >= end)
-  			pos = end;
-  		in.seek(pos);
-  	}
-  	
-  	return _nextKeyValue();
-  }
-  
-  private boolean _nextKeyValue() throws IOException {
-		if(currentRecord >= currentBlockSize && !readNextBlock() )
+  	// find next chunk if needed
+  	if(chunkRead > chunkSize && !nextChunk())
   		return false;
+  
+  	// find next block if needed
+  	if(currentRecord >= currentBlockSize && !nextBlock() )
+  		return false;	
   	
-  	key.set(pos);
+		// read this record in chunk
+		key.set(pos);
   	int recordLen = currentIndex.get(currentRecord);
   	value.read(in, recordLen);
   	
+  	// update state
   	currentRecord ++;
   	pos += recordLen;
+  	chunkRead += recordLen;
   	
   	return true;
   }
-
+  
+  private boolean nextChunk() throws IOException {
+  	int numChunksSkipped = sampler.next();
+  	while(numChunksSkipped > 0) {
+  		int skippedBytes = 0;
+  		while(skippedBytes < chunkSize) {
+	  		if(currentRecord >= currentBlockSize && !nextBlock() )
+		  		return false;	
+  		
+  			skippedBytes += currentIndex.get(currentRecord);
+  			currentRecord ++;
+  		};
+  	
+  		pos += skippedBytes;
+  		numChunksSkipped --;
+  	}
+  	
+  	in.seek(pos);
+  	chunkRead = 0;
+  	
+  	return true;
+  }
+  
   @Override
   public LongWritable getCurrentKey() {
     return key;

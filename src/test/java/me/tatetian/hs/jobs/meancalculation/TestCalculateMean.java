@@ -19,9 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestCalculateMean {
-	// For the convenience of test, it's desirable to have block size smaller
-	private static final int BLOCK_SIZE = 32 * 1024 * 1024;
-	
   protected Configuration conf;
   protected Path input;
   protected Path output;
@@ -34,18 +31,17 @@ public class TestCalculateMean {
     conf = new Configuration();
     conf.set("fs.default.name", "file:///");
     conf.set("mapred.job.tracker", "local");
-    conf.setInt("fs.local.block.size", BLOCK_SIZE);
     
     input = new Path("tmp/test_mean_calculation.data");
     output = new Path("tmp/mean_output");
     	
     fs = FileSystem.getLocal(conf);
     // overwrite input file
-    double mean = 100, sd = 80; 
-		DataSet dataSet = DataSetFactory.makeNormalDistOfMultipleFields(mean, sd);
-		dataSet.setNumReords(1000 * 1000 * 100);
-		CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, input);
-		dataSet.dump(out);
+//    double mean = 100, sd = 80; 
+//		DataSet dataSet = DataSetFactory.makeNormalDistOfMultipleFields(mean, sd);
+//		dataSet.setNumReords(1000 * 1000 * 10);
+//		CascadingSampledDataOutputStream out = CascadingSampledDataOutputStream.create(fs, input);
+//		dataSet.dump(out);
 		// delete old output file
     fs.delete(output, true);
   }
