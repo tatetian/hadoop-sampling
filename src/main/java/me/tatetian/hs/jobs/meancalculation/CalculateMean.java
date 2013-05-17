@@ -42,7 +42,7 @@ public class CalculateMean extends Configured implements Tool {
 			conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, samplingRatio);
 		}
 		
-		Job job = new Job(conf, "Mean Calculation");
+		Job job = new Job(conf, "Mean Calculation with Indexed Sampling");
     job.setJarByClass(CalculateMean.class);
     job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(CalculateMeanMapper.class);

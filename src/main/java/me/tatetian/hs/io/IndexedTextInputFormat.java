@@ -32,7 +32,9 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
   public List<InputSplit> getSplits(JobContext job, boolean splitable) throws IOException {		
   	Configuration conf = job.getConfiguration();
 		// Block merge ratio
-		float samplingRatio = conf.getFloat("cps.sampling.ratio", 1.0f);
+		float samplingRatio = conf.getFloat(
+											IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
+											IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
 		if(samplingRatio <= 0 || samplingRatio > 1)
 			throw new InvalidJobConfException("sampling ratio must be between 0 and 1");
     // TODO: decide best numBlocksCombined
