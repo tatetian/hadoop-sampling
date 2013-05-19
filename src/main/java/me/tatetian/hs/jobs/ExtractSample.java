@@ -2,6 +2,7 @@ package me.tatetian.hs.jobs;
 
 import java.io.IOException;
 
+import me.tatetian.hs.io.IOConfigKeys;
 import me.tatetian.hs.io.IndexedTextInputFormat;
 import me.tatetian.hs.io.Text;
 
@@ -39,7 +40,7 @@ public class ExtractSample  extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		if(args.length != 3) {
-			System.err.printf("sample <sampling_ratio> <input> <output>\n");
+			System.err.printf("sample <input> <output> <sampling_ratio>\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
@@ -53,7 +54,7 @@ public class ExtractSample  extends Configured implements Tool {
 		
 		// Job
 		Configuration conf = getConf();
-		conf.setFloat("cps.sampling.ratio", samplingRatio);
+		conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, samplingRatio);
 		
 		Job job = new Job(conf, "Sample Extraction");
     job.setJarByClass(ExtractSample.class);
