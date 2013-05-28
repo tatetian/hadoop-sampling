@@ -146,8 +146,11 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   	return true;
   }
   
+  private static final int SIZE_128KB = 128 * 1024;
+  
   private boolean nextChunk() throws IOException {
   	int numChunksSkipped = sampler.next();
+  	int skip = 0;
   	while(numChunksSkipped > 0) {
   		int skippedBytes = 0;
   		while(skippedBytes < chunkSize) {
@@ -158,11 +161,18 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   			currentRecord ++;
   		};
   	
-  		pos += skippedBytes;
+  		skip += skippedBytes;
   		numChunksSkipped --;
   	}
+  
+  	pos += skip;
   	
-  	in.seek(pos);
+  	while(skip > SIZE_128KB) {
+  		in.skip(SIZE_128KB);
+  		skip -= SIZE_128KB;
+  	}
+  	if(skip > 0) in.skip(skip);
+  	
   	chunkRead = 0;
   	
   	return true;

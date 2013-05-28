@@ -4,16 +4,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.junit.Test;
+
 /**
  * Test how buffer size influence the performance of sequential read
  * */
 public class TestRead {
 	private File path = new File("tmp/zero_16G");
-	
+
+	@Test
 	public void test() throws IOException {
 		long startTime, useTime; 
 		int bufferMax = 8 * 1024 * 1024;
-		for(int bufferSize = 256; bufferSize < bufferMax; bufferSize *= 2) {
+		for(int bufferSize = 256; bufferSize <= bufferMax; bufferSize *= 2) {
 			System.out.println("Reading file " + path + " with buffer size " + bufferSize + "...");
 			startTime = System.currentTimeMillis();
 			doRead(bufferSize);

@@ -47,7 +47,7 @@ public class TestIndexedRecordReader {
     fs = FileSystem.getLocal(conf);
   }
 	
-	@Ignore @Test
+	@Test @Ignore
 	public void test() throws IOException, InterruptedException, ClassNotFoundException {
     input = new Path("tmp/test_indexed_record_reader.data");
 		
@@ -59,7 +59,7 @@ public class TestIndexedRecordReader {
 		validateResult(recordsWritten, recordsRead);
 	}
 	
-	@Test
+	@Test 
 	public void perf() throws IOException {
 		input = new Path("tmp/test_mean_calculation.data");
 		
