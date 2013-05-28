@@ -3,6 +3,7 @@ package me.tatetian.hs.jobs.meancalculation;
 import java.io.IOException;
 import java.util.Random;
 
+import me.tatetian.hs.io.IOConfigKeys;
 import me.tatetian.hs.io.Text;
 
 import org.apache.hadoop.conf.Configuration;
@@ -34,7 +35,8 @@ public class CalculateMeanMapperWithNaiveSampling extends Mapper<LongWritable, T
   protected void setup(Context context
                        ) throws IOException, InterruptedException {
   	Configuration conf = context.getConfiguration();
-  	samplingRatio = conf.getFloat("cps.sampling.ratio", 1.0f); 
+  	samplingRatio = conf.getFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
+  															  IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT); 
   }
 	
 	@Override
