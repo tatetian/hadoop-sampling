@@ -31,9 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
-  private static final Log LOG = LogFactory.getLog(IndexedRecordReader.class);
-
-  private FSDataInputStream in;
+	private IndexedFileSplit.Reader splitReader;
+  private FSDataInputStream dataIn;
   private LongWritable key = null;
   private Text value = null;
 
@@ -41,20 +40,10 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   private long end;
   private long pos;
   
-  private IndexMeta[] indexMeta;
-  private int numBlocks;
-  private int currentBlock;
-  private Index currentIndex;
-  private int currentBlockSize;
-  private int currentRecord;
-  private int chunkEnd;
-  private IndexFile.Reader indexReader;
-  
-  private int chunkSize = 4096;
-  private int chunkRead = 0; 
-  
-  // trim CR at end of record
-  private boolean trimCR;
+  // Related to the current block
+  private Index index;
+  private int numRecords;
+  private int nextRecord;
   
   private SkipSampler sampler = null;
   
@@ -65,7 +54,6 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   public IndexedRecordReader(boolean trimCR) {  	
   	this.key = new LongWritable(-1);
   	this.value = new Text();
-  	this.trimCR = trimCR;
   	this.value.setTrimCR(trimCR);
   }
 
@@ -74,111 +62,93 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
     if(!(genericSplit instanceof IndexedFileSplit))
     	throw new IllegalArgumentException("input split must be indexed");
   	
+    // init split reader
   	IndexedFileSplit split = (IndexedFileSplit) genericSplit;
     Configuration conf = context.getConfiguration();
-    
-    // Open file
-    Path dataFile = split.getPath();
-    FileSystem fs = dataFile.getFileSystem(conf);
-    in = fs.open(dataFile);
-    start = split.getStart();
-    end = start + split.getLength();
-    
-    pos = start;
-    in.seek(pos);
-    
-    // Open index
-    indexMeta = split.getIndexMeta();
-    Path indexFile = IndexUtil.getIndexPath(dataFile);
-    currentBlock = 0;
-    indexReader = new IndexFile.Reader(conf, indexFile);
-    long indexStart = indexMeta[currentBlock].indexBlockOffset;
-    indexReader.seek(indexStart);
-    currentIndex = Index.createIndex(conf);
+    splitReader = new IndexedFileSplit.Reader(split, conf);
+    dataIn = splitReader.getDataStream();
+    index  = splitReader.getIndex();
     
     // Init sampler
-    double samplingRatio = conf.getFloat(
-    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
-    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
-    sampler = new SkipSampler(samplingRatio);
-    
-    // Ready to read records
-    chunkSize = conf.getInt(
-    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, 
-    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE_DEFAULT);
-    chunkRead = Integer.MAX_VALUE;
-    numBlocks = indexMeta.length;
-    currentRecord = currentBlockSize = 0;
+//    double samplingRatio = conf.getFloat(
+//    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
+//    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
+//    sampler = new SkipSampler(samplingRatio);
+//    
+//    // Ready to read records
+//    groupSize = conf.getInt(
+//    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, 
+//    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE_DEFAULT);
+//    groupRead = Integer.MAX_VALUE;
+//    numBlocks = indexMeta.length;
+//    nextRecord = numRecords = 0;
   }
   
   private boolean nextBlock() throws IOException {
-  	if(currentBlock >= numBlocks) 
+  	// process next block in the split
+  	if(!splitReader.nextBlock()) 
   		return false;
+  		
+  	// reset counter
+  	pos = splitReader.position();
+  	numRecords = index.size();
+		nextRecord = 0;
   
-  	indexReader.next(currentIndex);
-  	
-  	currentBlockSize = currentIndex.size();
-		currentRecord = 0;
-  
-  	currentBlock ++;
   	return true;
   }
   
   public boolean nextKeyValue() throws IOException {
-  
-  	
   	// find next chunk if needed
-  	if(chunkRead > chunkSize && !nextChunk())
-  		return false;
+  	//if(groupRead > groupSize && !nextChunk())
+  	//	return false;
   
   	// find next block if needed
-  	if(currentRecord >= currentBlockSize && !nextBlock() )
+  	if(nextRecord >= numRecords && !nextBlock() )
   		return false;	
   	
 		// read this record in chunk
 		key.set(pos);
-  	int recordLen = currentIndex.get(currentRecord);
-  	value.read(in, recordLen);
+  	int recordLen = index.get(nextRecord);
+  	value.read(dataIn, recordLen);
   	
   	// update state
-  	currentRecord ++;
+  	nextRecord ++;
   	pos += recordLen;
-  	chunkRead += recordLen;
   	
   	return true;
   }
   
   private static final int SIZE_128KB = 128 * 1024;
   
-  private boolean nextChunk() throws IOException {
-  	int numChunksSkipped = sampler.next();
-  	int skip = 0;
-  	while(numChunksSkipped > 0) {
-  		int skippedBytes = 0;
-  		while(skippedBytes < chunkSize) {
-	  		if(currentRecord >= currentBlockSize && !nextBlock() )
-		  		return false;	
-  		
-  			skippedBytes += currentIndex.get(currentRecord);
-  			currentRecord ++;
-  		};
-  	
-  		skip += skippedBytes;
-  		numChunksSkipped --;
-  	}
-  
-  	pos += skip;
-  	
-  	while(skip > SIZE_128KB) {
-  		in.skip(SIZE_128KB);
-  		skip -= SIZE_128KB;
-  	}
-  	if(skip > 0) in.skip(skip);
-  	
-  	chunkRead = 0;
-  	
-  	return true;
-  }
+//  private boolean nextChunk() throws IOException {
+//  	int numChunksSkipped = sampler.next();
+//  	int skip = 0;
+//  	while(numChunksSkipped > 0) {
+//  		int skippedBytes = 0;
+//  		while(skippedBytes < groupSize) {
+//	  		if(nextRecord >= numRecords && !nextBlock() )
+//		  		return false;	
+//  		
+//  			skippedBytes += index.get(nextRecord);
+//  			nextRecord ++;
+//  		};
+//  	
+//  		skip += skippedBytes;
+//  		numChunksSkipped --;
+//  	}
+//  
+//  	pos += skip;
+//  	
+//  	while(skip > SIZE_128KB) {
+//  		dataIn.skip(SIZE_128KB);
+//  		skip -= SIZE_128KB;
+//  	}
+//  	if(skip > 0) dataIn.skip(skip);
+//  	
+//  	groupRead = 0;
+//  	
+//  	return true;
+//  }
   
   @Override
   public LongWritable getCurrentKey() {
@@ -201,9 +171,7 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   }
   
   public synchronized void close() throws IOException {
-    if (in != null) 
-      in.close();
-    if (indexReader != null)
-    	indexReader.close();
+    if(splitReader != null)
+    	splitReader.close();
   }
 }

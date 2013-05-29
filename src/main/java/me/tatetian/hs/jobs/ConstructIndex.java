@@ -116,7 +116,7 @@ public class ConstructIndex extends Configured implements Tool  {
 		
 		public InputSplitSummary() {
 			meta = new IndexMeta();
-			index = new Index(16 * 1024 * 1024);
+			index = new Index();
 		}
 		public InputSplitSummary(IndexMeta meta, Index index) {
 			setIndexMeta(meta);
@@ -163,15 +163,13 @@ public class ConstructIndex extends Configured implements Tool  {
 		 * Called once at the beginning of the task.
 		 */
 	  protected void setup(Context context) throws IOException, InterruptedException {
-	  	// Get configuration
-	  	Configuration conf 		= context.getConfiguration();
 			// Get input file info
 	  	FileSplit inputSplit 	= (FileSplit) context.getInputSplit();
 			Path inputFile 				= inputSplit.getPath();
 	  	// Init meta
 	  	meta  = new IndexMeta();
 	  	// Init index
-	  	index = Index.createIndex(conf);
+	  	index = new Index();
 	  	// Init intermediate results
 	  	inputSplitMeta 		= new InputSplitMeta(inputFile.toString(), realStart);
 	  	inputSplitSummary = new InputSplitSummary(meta, index);

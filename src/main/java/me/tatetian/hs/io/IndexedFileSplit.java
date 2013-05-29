@@ -1,12 +1,19 @@
 package me.tatetian.hs.io;
 
+import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
+import me.tatetian.hs.index.Index;
+import me.tatetian.hs.index.IndexFile;
 import me.tatetian.hs.index.IndexMeta;
+import me.tatetian.hs.index.IndexUtil;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
@@ -14,6 +21,65 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 public class IndexedFileSplit extends FileSplit {
 	private IndexMeta[] metas = null;
 
+	public static class Reader implements Closeable {
+		private IndexedFileSplit split;
+		private FSDataInputStream dataIn;
+		private IndexFile.Reader indexReader;
+
+		private IndexMeta[] metas;
+		private int nextBlock = 0;
+		private Index index = new Index();
+		
+		public Reader(IndexedFileSplit split, Configuration conf) throws IOException {
+			this.split = split;
+			this.metas = split.getIndexMeta();
+			
+			// open data stream
+			Path dataFile = split.getPath();
+			FileSystem fs = dataFile.getFileSystem(conf);
+	    dataIn = fs.open(dataFile);
+	    // open index reader
+	    Path indexFile = IndexUtil.getIndexPath(dataFile);
+	    indexReader = new IndexFile.Reader(conf, indexFile);
+		}
+		
+		public FSDataInputStream getDataStream() {
+			return dataIn;
+		}
+		
+		public Index getIndex() {
+			return index;
+		}
+		
+		public boolean nextBlock() throws IOException {
+			if(nextBlock >= metas.length) return false;
+			
+			// load index meta of next block
+			IndexMeta meta = metas[nextBlock];
+			// load index of next block
+			indexReader.seek(meta.indexBlockOffset);
+			indexReader.next(index);
+			// find the start of next block
+			dataIn.seek(meta.dataBlockOffset);
+			
+			nextBlock ++;
+			
+			return true;
+		}
+		
+		public long position() throws IOException {
+			return dataIn.getPos();
+		}
+
+		@Override
+		public void close() throws IOException {
+			if (dataIn != null) 
+				dataIn.close();
+			if (indexReader != null)
+				indexReader.close();
+		}
+	} 
+	
 	public IndexedFileSplit() {
 		super();
 		metas = null;

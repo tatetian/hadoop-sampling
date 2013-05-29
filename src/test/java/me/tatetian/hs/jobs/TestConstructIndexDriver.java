@@ -89,7 +89,7 @@ public class TestConstructIndexDriver {
 		inputReader			= FileUtil.readTextFile(input, conf);
 		indexReader 		= new IndexFile.Reader(conf, indexPath);
 		indexMetaReader = new IndexMetaFile.Reader(conf, indexMetaPath);
-		Index index 		= new Index(BLOCK_SIZE / 8);
+		Index index 		= new Index();
 		IndexMeta meta  = new IndexMeta();
 		// Iterate blocks
 		long dataBlockOffset = 0;
