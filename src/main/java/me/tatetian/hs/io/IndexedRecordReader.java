@@ -104,8 +104,8 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
     
     // Ready to read records
     chunkSize = conf.getInt(
-    								IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE, 
-    								IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE_DEFAULT);
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, 
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE_DEFAULT);
     chunkRead = Integer.MAX_VALUE;
     numBlocks = indexMeta.length;
     currentRecord = currentBlockSize = 0;
@@ -125,6 +125,8 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   }
   
   public boolean nextKeyValue() throws IOException {
+  
+  	
   	// find next chunk if needed
   	if(chunkRead > chunkSize && !nextChunk())
   		return false;

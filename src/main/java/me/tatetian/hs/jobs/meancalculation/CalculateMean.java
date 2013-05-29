@@ -20,11 +20,12 @@ public class CalculateMean extends Configured implements Tool {
 	private final boolean profiling = false;
 	
 	private float samplingRatio = -1;
+	private int groupSize =-1;
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		if(args.length != 2 && args.length != 3) {
-			System.err.printf("mean <input> <output> [<sampling_ratio>]\n");
+		if(args.length < 2 && args.length > 4) {
+			System.err.printf("mean <input> <output> [<sampling_ratio> <group_size>]\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
@@ -35,12 +36,19 @@ public class CalculateMean extends Configured implements Tool {
 				System.err.println("<sampling_ratio> must be between 0 and 1");
 				return -1;
 			}
+			if(args.length == 4) {
+				groupSize = Integer.parseInt(args[3]);
+			}
 		}
 		
 		Configuration conf = getConf();
 		if(samplingRatio > 0) {
 			conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, samplingRatio);
 		}
+		if(groupSize > 0) {
+			conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, groupSize);
+		}
+		
 		
 		Job job = new Job(conf, "Mean Calculation with Indexed Sampling");
     job.setJarByClass(CalculateMean.class);

@@ -18,7 +18,6 @@ public class CalculateMeanWithIndexedSampling extends CalculateMean {
 
 		Configuration conf = job.getConfiguration();
 		
-    //conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_CHUNK_SIZE, 2048 + 1024);
 		// Optimize DfsClient performance by enabling local reading shortcircuit
 		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY, true);
 		conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_SKIP_CHECKSUM_KEY, true);
