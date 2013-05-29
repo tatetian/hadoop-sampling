@@ -25,7 +25,7 @@ public class TestIndexFile {
 		try {
 			writer = new IndexFile.Writer(conf, indexFile);
 			for(int blockId = 0; blockId < numBlocks; blockId++) {
-				indexWritten[blockId] = Index.createIndex(conf);
+				indexWritten[blockId] = new Index();
 				for(int recordId = 0; recordId < numRecordsPerBlock + blockId * 128; recordId++) {
 					indexWritten[blockId].add(recordId * 50);
 				}
@@ -38,7 +38,7 @@ public class TestIndexFile {
 		IndexFile.Reader reader = null; 
 		try {
 		reader = new IndexFile.Reader(conf, indexFile);
-			Index indexRead = Index.createIndex(conf);
+			Index indexRead = new Index();
 			int blockId = 0;
 			while(reader.next(indexRead)) {
 				Assert.assertEquals(indexWritten[blockId], indexRead);

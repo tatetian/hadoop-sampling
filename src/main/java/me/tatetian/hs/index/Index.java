@@ -11,54 +11,55 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Writable;
 
 public class Index implements Writable {
-	private ByteBuffer buff = null;
+	private short[] recordLens;
+	private int numRecords = 0;
 	
-	public static Index createIndex(Configuration conf) {
-		int maxSize = getMaxIndexSize(conf);
-		return new Index(maxSize);
-	} 
+	private static final short[] EMPTY_SHORT_ARRAY = new short[0];
 	
-	private static int getMaxIndexSize(Configuration conf) {
-		 int blockSize = conf.getInt("dfs.blocksize", 32 * 1024 * 1024); 
-		 return conf.getInt("cps.indexing.size.max", blockSize) / 8;
-	}
-	
-	public Index(int maxSize) {
-		buff = ByteBuffer.allocate(maxSize);
-		buff.order(ByteOrder.nativeOrder());	// always use native order
+	public Index() {
+		recordLens = EMPTY_SHORT_ARRAY;
 	}
 
 	public void clear() {
-		buff.clear();
+		numRecords = 0;
 	}
 	
 	public int size() {
-		assert(buff.position() % 4 == 0);
-		return buff.position() / 4;
+		return numRecords;
+	}
+	
+	public int capacity() {
+		return recordLens.length;
 	}
 	
 	public void add(int recordLen) {
-		buff.putInt(recordLen);
+		int capacity = capacity();
+		if(numRecords >= capacity) {
+			capacity = capacity < 1024 ? 1024 : capacity * 2;
+			recordLens = Arrays.copyOf(recordLens, capacity);
+		}
+		recordLens[numRecords++] = (short) recordLen;
 	}
 	
 	public int get(int index) {
-		return buff.getInt(index << 2);
+		return recordLens[index];
 	}
 	
 	@Override
 	public void write(DataOutput out) throws IOException {
-		int len = buff.position();
-		out.writeInt(len);
-		out.write(buff.array(), 0, len);
+		out.writeInt(numRecords);
+		for(int i = 0; i < numRecords; i++)
+			out.writeShort(recordLens[i]);
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException {
-		buff.clear();
-		int len = in.readInt();		
-		assert(len % 4 == 0);
-		in.readFully(buff.array(), 0, len);
-		buff.position(len);
+		numRecords = in.readInt();
+		
+		if(numRecords > recordLens.length)
+			recordLens = new short[numRecords];
+		for(int i = 0; i < numRecords; i++)
+			recordLens[i] = in.readShort();
 	}
 
 	@Override
@@ -80,6 +81,14 @@ public class Index implements Writable {
 		if(!(o instanceof Index)) return false;
 		
 		Index another = (Index) o;
-		return Arrays.equals(buff.array(), another.buff.array());
+		
+		// check size
+		int size = size();
+		if(size != another.size()) return false;
+		// check content
+		for(int i = 0; i < size; i++)
+			if(recordLens[i] != another.recordLens[i]) return false;
+		
+		return true;
 	}
 }

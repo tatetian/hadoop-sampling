@@ -15,18 +15,17 @@ import org.junit.Test;
 public class TestIndex {
 	@Test
 	public void testWritable() throws IOException {
-		Configuration conf = new Configuration();
 		// Write content
 		ByteArrayOutputStream out0 = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(out0);
-		Index indexWritten = Index.createIndex(conf);
+		Index indexWritten = new Index();
 		indexWritten.add(1);
 		indexWritten.add(2);
 		indexWritten.write(out);
 		// Read content
 		ByteArrayInputStream in0 = new ByteArrayInputStream(out0.toByteArray());
 		DataInputStream in = new DataInputStream(in0);		
-		Index indexRead = Index.createIndex(conf);
+		Index indexRead = new Index();
 		indexRead.readFields(in);
 		// Check equality
 		Assert.assertEquals(indexWritten, indexRead);
@@ -34,9 +33,8 @@ public class TestIndex {
 
 	@Test
 	public void testEquality() {
-		Configuration conf = new Configuration();
-		Index index1 = Index.createIndex(conf);
-		Index index2 = Index.createIndex(conf);
+		Index index1 = new Index();
+		Index index2 = new Index();
 		Assert.assertEquals(index1, index2);
 		index1.add(1); index2.add(2);
 		Assert.assertFalse(index1.equals(index2));
@@ -50,7 +48,7 @@ public class TestIndex {
 	@Test
 	public void testToString() {
 		Configuration conf = new Configuration();
-		Index index = Index.createIndex(conf);
+		Index index = new Index();
 		index.add(1);
 		index.add(2);
 		index.add(3);
