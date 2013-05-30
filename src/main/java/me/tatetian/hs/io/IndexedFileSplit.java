@@ -27,6 +27,7 @@ public class IndexedFileSplit extends FileSplit {
 		private IndexFile.Reader indexReader;
 
 		private IndexMeta[] metas;
+		private IndexMeta meta;
 		private int nextBlock = 0;
 		private Index index = new Index();
 		
@@ -55,7 +56,7 @@ public class IndexedFileSplit extends FileSplit {
 			if(nextBlock >= metas.length) return false;
 			
 			// load index meta of next block
-			IndexMeta meta = metas[nextBlock];
+			meta = metas[nextBlock];
 			// load index of next block
 			indexReader.seek(meta.indexBlockOffset);
 			indexReader.next(index);
@@ -65,6 +66,10 @@ public class IndexedFileSplit extends FileSplit {
 			nextBlock ++;
 			
 			return true;
+		}
+		
+		public void seekInBlock(long offset) throws IOException {
+			dataIn.seek(meta.indexBlockOffset + offset);
 		}
 		
 		public float progress() {

@@ -88,7 +88,8 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         	meta = new IndexMeta();
         }
         // Build splits for each data node
-        final int NUM_MAP_SLOTS = conf.getInt("mapreduce.tasktracker.map.tasks.maximum", 2);
+        // experiments showed 8 is best!
+        final int NUM_MAP_SLOTS = 8; //conf.getInt("mapreduce.tasktracker.map.tasks.maximum", 2);
         //strDataNodes = Arrays.copyOf(strDataNodes, strDataNodes.length + 1);
         //strDataNodes[strDataNodes.length - 1] = NO_HOSTS;
         for(String node : strDataNodes) {
