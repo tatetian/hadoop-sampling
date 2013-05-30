@@ -25,12 +25,12 @@ public class CalculateMean extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		if(args.length < 2 && args.length > 4) {
-			System.err.printf("mean <input> <output> [<sampling_ratio> <seeks_per_split>]\n");
+			System.err.printf("mean <input> <output> [[<sampling_ratio>] <seeks_per_split>]\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
 		
-		if(args.length == 3) {
+		if(args.length >= 3) {
 			samplingRatio = Float.parseFloat(args[2]);
 			if(samplingRatio <= 0 || samplingRatio > 1) {
 				System.err.println("<sampling_ratio> must be between 0 and 1");

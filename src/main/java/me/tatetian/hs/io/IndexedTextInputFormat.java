@@ -38,7 +38,7 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
   public List<InputSplit> getSplits(JobContext job, boolean splitable) throws IOException {		
   	Configuration conf = job.getConfiguration();
 		// Block merge ratio
-		float samplingRatio = conf.getFloat(
+		final float samplingRatio = conf.getFloat(
 											IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
 											IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
 		if(samplingRatio <= 0 || samplingRatio > 1)
@@ -46,7 +46,6 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
     // generate splits
     List<InputSplit> splits = new ArrayList<InputSplit>();
     List<FileStatus> files 	= listStatus(job);
-    List<IndexMeta>  metas 	= new ArrayList<IndexMeta>();
     for (FileStatus file: files) {
       long length = file.getLen();
       if (length > 0) {
@@ -69,7 +68,7 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         }
         // Assign blocks to data nodes
         String[] strDataNodes = dataNodes.keySet().toArray(new String[]{});        
-        dataNodes.put(NO_HOSTS, new ArrayList<IndexMeta>());
+        //dataNodes.put(NO_HOSTS, new ArrayList<IndexMeta>());
         int numNodes = strDataNodes.length;
         int nodeId = 0;
         IndexMeta meta = new IndexMeta();
@@ -79,30 +78,19 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         	int blkIndex = getBlockIndex(blkLocations, blkStart);
         	BlockLocation blkLocation = blkLocations[blkIndex];
         	String[] hosts = blkLocation.getHosts();
-        	String nodeChosen = NO_HOSTS;
+        	String nodeMissing = null;
+        	// TODO: remove the assumption that there are 4 nodes
         	if(hosts.length > 0) {
-	        	// assign this block to a data node
-	        	boolean foundHost = false;
-	        	while(true) {
-	        		for(String host : hosts) {
-	        			if(host.equals(strDataNodes[nodeId])) {
-	        				foundHost = true;
-	        				break;
-	        			}
-	        		}        		
-	        		nodeId = (nodeId + 1) % numNodes;        		
-	        		
-	        		if(foundHost)  break;
-	        	}
-	        	nodeChosen = strDataNodes[nodeId];
+        		nodeMissing = findMissingOne(hosts, strDataNodes);
+        		assert(nodeMissing != null);
         	}
-        	dataNodes.get(nodeChosen).add(meta);
+        	dataNodes.get(nodeMissing).add(meta);
         	meta = new IndexMeta();
         }
         // Build splits for each data node
         final int NUM_MAP_SLOTS = conf.getInt("mapreduce.tasktracker.map.tasks.maximum", 2);
-        strDataNodes = Arrays.copyOf(strDataNodes, strDataNodes.length + 1);
-        strDataNodes[strDataNodes.length - 1] = NO_HOSTS;
+        //strDataNodes = Arrays.copyOf(strDataNodes, strDataNodes.length + 1);
+        //strDataNodes[strDataNodes.length - 1] = NO_HOSTS;
         for(String node : strDataNodes) {
         	List<IndexMeta> blks = dataNodes.get(node);
         	int numBlks = blks.size();
@@ -110,6 +98,7 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         	int numSplits 	 = splitable ? Math.max(NUM_MAP_SLOTS, numEffectiveBlks) : 1;
         	int blksPerSplit = (int) Math.ceil( (float)numBlks / numSplits );
         	int blkId = 0;
+        	String[] hosts = removeMissingOne(strDataNodes, node);
         	while(numBlks > 0) {
         		int numBlksSplit = Math.min(numBlks, blksPerSplit);
         		IndexMeta[] blksSplit = new IndexMeta[numBlksSplit];
@@ -121,8 +110,9 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         		long splitStart = blksSplit[0].dataBlockOffset;
         		InputSplit split = new IndexedFileSplit(
 																	inputPath, splitStart, splitLen, 
-																	node.equals(NO_HOSTS) ? null : new String[]{node},
+																	hosts,
 																	blksSplit);
+        		System.out.println("hosts: " + Arrays.toString(hosts) + "; " + split);
 						splits.add(split);
 						
         		numBlks -= numBlksSplit;
@@ -133,6 +123,36 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
     }
     return splits;
   }	
+  
+  private String findMissingOne(String[] hosts, String[] allNodes) {
+  	assert(hosts.length == 3);
+  	assert(allNodes.length == 4);
+  	
+  	for(String node: allNodes) {
+  		boolean found = false;
+  		for(String host: hosts) {
+  			if(host.equals(node)) {
+  				found = true;
+  				break;
+  			}
+  		}
+  		if(!found) return node;
+  	}
+  	return null;
+  }
+  
+  private String[] removeMissingOne(String[] allNodes, String missOne) {
+  	String[] allNodesExceptOne = new String[allNodes.length - 1];
+  	int i = 0, j = 0;
+  	while(i < allNodes.length) {
+  		if(!missOne.equals(allNodes[i])) {
+  			allNodesExceptOne[j] = allNodes[i];
+  			j ++;
+  		}
+  		i ++;
+  	}
+  	return allNodesExceptOne;
+  }
   	
 	@Override
 	public RecordReader<LongWritable, Text> createRecordReader(InputSplit split,
