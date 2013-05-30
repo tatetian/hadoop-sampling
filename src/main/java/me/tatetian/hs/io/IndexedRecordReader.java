@@ -37,8 +37,6 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   private LongWritable key = null;
   private Text value = null;
 
-  private long start;
-  private long end;
   private long pos;
   
   // Related to the current block
@@ -46,7 +44,6 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   private int nextRecord;
   private int numRecords;
   
-  private int groupEnd;
   private int nextGroup;
   private int groupSize;
   private int numGroups;
@@ -220,10 +217,7 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
    * Get the progress within the split
    */
   public float getProgress() throws IOException {
-  	if(end == start) 
-  		return 0.0f;
-  	else
-  		return (pos - start) / (end - start);
+  	return splitReader.progress();
   }
   
   public synchronized void close() throws IOException {

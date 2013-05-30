@@ -3,7 +3,11 @@ package me.tatetian.hs.io;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import me.tatetian.hs.index.IndexMeta;
 import me.tatetian.hs.index.IndexMetaFile;
@@ -23,6 +27,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> {
+	private static final String NO_HOSTS = "__NO_HOSTS__";
+	
 	@Override
   public List<InputSplit> getSplits(JobContext job) throws IOException {		
 		return getSplits(job, true);
@@ -37,9 +43,6 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
 											IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
 		if(samplingRatio <= 0 || samplingRatio > 1)
 			throw new InvalidJobConfException("sampling ratio must be between 0 and 1");
-    // TODO: decide best numBlocksCombined
-		int numBlocksCombined = splitable ? (int) Math.min(Math.floor(1/samplingRatio),12) :
-																				Integer.MAX_VALUE ;
     // generate splits
     List<InputSplit> splits = new ArrayList<InputSplit>();
     List<FileStatus> files 	= listStatus(job);
@@ -52,36 +55,78 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
       	IndexMetaFile.Reader metaReader = new IndexMetaFile.Reader(conf, indexMetaPath);
         FileSystem fs = inputPath.getFileSystem(conf);
         BlockLocation[] blkLocations = fs.getFileBlockLocations(file, 0, length);
-        
-        // iterate blocks
-				long splitStart = 0; long splitLen = 0;
-				boolean hasBlocks = true;
-				while(hasBlocks) {
-					// combine blocks
-					int blockCount = 0;
-					while(blockCount < numBlocksCombined) {
-						IndexMeta meta = new IndexMeta();
-						hasBlocks = metaReader.next(meta);
-						if(!hasBlocks) break;
-						
-						splitLen += meta.dataBlockLen;
-						metas.add(meta);
-						blockCount ++;
-					}
-					// add a split than spans across several blocks
-					if(blockCount > 0) {
-						int blkIndex = getBlockIndex(blkLocations, splitStart);
-						InputSplit split = new IndexedFileSplit(
+
+        // Find all data nodes
+        Map<String, List<IndexMeta>> dataNodes = new HashMap<String, List<IndexMeta>>();
+        dataNodes.put(NO_HOSTS, new ArrayList<IndexMeta>());
+        for(BlockLocation bl: blkLocations) {
+        	String[] hosts = bl.getHosts();
+        	// if has hosts info
+        	for(String host: hosts) {
+        		if(!dataNodes.containsKey(host)) {
+        			dataNodes.put(host, new ArrayList<IndexMeta>());
+        		}
+        	}
+        }
+        // Assign blocks to data nodes
+        String[] strDataNodes = dataNodes.keySet().toArray(new String[]{});
+        int numNodes = strDataNodes.length;
+        int nodeId = 0;
+        IndexMeta meta = new IndexMeta();
+        while(metaReader.next(meta)) {
+        	// find out hosts info of this block
+        	long blkStart = meta.dataBlockOffset;
+        	int blkIndex = getBlockIndex(blkLocations, blkStart);
+        	BlockLocation blkLocation = blkLocations[blkIndex];
+        	String[] hosts = blkLocation.getHosts();
+        	String nodeChosen = NO_HOSTS;
+        	if(hosts.length > 0) {
+	        	// assign this block to a data node
+	        	boolean foundHost = false;
+	        	while(true) {
+	        		for(String host : hosts) {
+	        			if(host.equals(strDataNodes[nodeId])) {
+	        				foundHost = true;
+	        				break;
+	        			}
+	        		}        		
+	        		nodeId = (nodeId + 1) % numNodes;        		
+	        		
+	        		if(foundHost)  break;
+	        	}
+	        	nodeChosen = strDataNodes[nodeId];
+        	}
+        	dataNodes.get(nodeChosen).add(meta);
+        	meta = new IndexMeta();
+        }
+        // Build splits for each data node
+        final int NUM_MAP_SLOTS = conf.getInt("mapreduce.tasktracker.map.tasks.maximum", 2);
+        for(String node : strDataNodes) {
+        	List<IndexMeta> blks = dataNodes.get(node);
+        	int numBlks = blks.size();
+        	int numEffectiveBlks = (int) (numBlks * samplingRatio);
+        	int numSplits 	 = splitable ? Math.min(NUM_MAP_SLOTS, numEffectiveBlks) : 1;
+        	int blksPerSplit = (int) Math.ceil( numBlks / numSplits );
+        	int blkId = 0;
+        	while(numBlks > 0) {
+        		int numBlksSplit = Math.min(numBlks, blksPerSplit);
+        		IndexMeta[] blksSplit = new IndexMeta[numBlksSplit];
+        		long splitLen = 0;
+        		for(int i = 0; i < numBlksSplit; i++) {
+        			blksSplit[i] = blks.get(blkId + i);
+        			splitLen += blksSplit[i].dataBlockLen;
+        		}
+        		long splitStart = blksSplit[0].dataBlockOffset;
+        		InputSplit split = new IndexedFileSplit(
 																	inputPath, splitStart, splitLen, 
-																	blkLocations[blkIndex].getHosts(), 
-																	(IndexMeta[]) metas.toArray(new IndexMeta[]{}));
+																	node.equals(NO_HOSTS) ? null : new String[]{node},
+																	blksSplit);
 						splits.add(split);
 						
-						splitStart += splitLen;
-						splitLen = 0;
-						metas.clear();
-					}	
-				}
+        		numBlks -= numBlksSplit;
+        		blkId   += numBlksSplit; 
+        	}
+        }
       }
     }
     return splits;

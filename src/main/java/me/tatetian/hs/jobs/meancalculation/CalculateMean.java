@@ -20,12 +20,12 @@ public class CalculateMean extends Configured implements Tool {
 	private final boolean profiling = false;
 	
 	private float samplingRatio = -1;
-	private int groupSize =-1;
+	private int seeksPerSplit =-1;
 	
 	@Override
 	public int run(String[] args) throws Exception {
 		if(args.length < 2 && args.length > 4) {
-			System.err.printf("mean <input> <output> [<sampling_ratio> <group_size>]\n");
+			System.err.printf("mean <input> <output> [<sampling_ratio> <seeks_per_split>]\n");
 			ToolRunner.printGenericCommandUsage(System.err);
 			return -1;
 		}
@@ -37,7 +37,7 @@ public class CalculateMean extends Configured implements Tool {
 				return -1;
 			}
 			if(args.length == 4) {
-				groupSize = Integer.parseInt(args[3]);
+				seeksPerSplit = Integer.parseInt(args[3]);
 			}
 		}
 		
@@ -45,8 +45,8 @@ public class CalculateMean extends Configured implements Tool {
 		if(samplingRatio > 0) {
 			conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, samplingRatio);
 		}
-		if(groupSize > 0) {
-			conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_SEEKS, groupSize);
+		if(seeksPerSplit > 0) {
+			conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_SEEKS, seeksPerSplit);
 		}
 		
 		

@@ -67,6 +67,10 @@ public class IndexedFileSplit extends FileSplit {
 			return true;
 		}
 		
+		public float progress() {
+			return nextBlock / metas.length;
+		}
+		
 		public long position() throws IOException {
 			return dataIn.getPos();
 		}
