@@ -1,6 +1,7 @@
 package me.tatetian.hs.io;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +43,24 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   
   // Related to the current block
   private Index index;
-  private int numRecords;
   private int nextRecord;
+  private int numRecords;
+  
+  private int groupEnd;
+  private int nextGroup;
+  private int groupSize;
+  private int numGroups;
+  
+  private int buffEndRecord;
+  
+  private int MAX_SEEKS;
+  private float SAMPLING_RATIO;
+  
+  private final int BUFF_SIZE = 2 * 1024 * 1024; // 1M
+  private byte[] buff = new byte[BUFF_SIZE]; 
+  private int buffPos;
+  
+  private int numGroupsSkipped;
   
   private SkipSampler sampler = null;
   
@@ -70,15 +87,15 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
     index  = splitReader.getIndex();
     
     // Init sampler
-//    double samplingRatio = conf.getFloat(
-//    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
-//    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
+    SAMPLING_RATIO = conf.getFloat(
+	    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 
+	    								IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO_DEFAULT);
 //    sampler = new SkipSampler(samplingRatio);
 //    
 //    // Ready to read records
-//    groupSize = conf.getInt(
-//    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, 
-//    								IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE_DEFAULT);
+    MAX_SEEKS = conf.getInt(
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_SEEKS, 
+    								IOConfigKeys.HS_INDEXED_RECORD_READER_SEEKS_DEFAULT);
 //    groupRead = Integer.MAX_VALUE;
 //    numBlocks = indexMeta.length;
 //    nextRecord = numRecords = 0;
@@ -89,34 +106,73 @@ public class IndexedRecordReader extends RecordReader<LongWritable, Text> {
   	if(!splitReader.nextBlock()) 
   		return false;
   		
-  	// reset counter
+  	// reset counter 
+  	numRecords = index.numRecords();
+  	nextRecord = 0;  	
+  	buffEndRecord = 0;
+  	
+  	int numSampledRecords = (int) Math.max(1, numRecords * SAMPLING_RATIO);
+  	numGroups = Math.min(numSampledRecords, MAX_SEEKS) ;
+  	groupSize = Math.max(1, numSampledRecords / numGroups);
+  	nextGroup = 0;
+  	
   	pos = splitReader.position();
-  	numRecords = index.size();
-		nextRecord = 0;
-  
+  		
   	return true;
   }
   
   public boolean nextKeyValue() throws IOException {
-  	// find next chunk if needed
-  	//if(groupRead > groupSize && !nextChunk())
-  	//	return false;
+  	if(isBufferDrain() && !fillBuffer()) 
+  		return false;
+  	
+  	return readBuffer();
+  }
   
-  	// find next block if needed
-  	if(nextRecord >= numRecords && !nextBlock() )
-  		return false;	
+  private boolean isBufferDrain() {
+  	return nextRecord >= buffEndRecord;  
+  }
+  
+  private boolean fillBuffer() throws IOException {
+  	// load next block if needed
+  	if(nextGroup >= numGroups && !nextBlock())
+  		return false;
   	
-		// read this record in chunk
-		key.set(pos);
-  	int recordLen = index.get(nextRecord);
-  	value.read(dataIn, recordLen);
+  	// TODO: find next group
   	
-  	// update state
-  	nextRecord ++;
-  	pos += recordLen;
+  	// read data of the group
+  	int fill = 0;
+  	buffEndRecord = Math.min(nextRecord + groupSize, numRecords);
+  	for(int i = nextRecord; i < buffEndRecord; i++) {
+  		fill += index.get(i);
+  	}  	
+  	// TODO: get rid of the assumption that buffer is large enough to read data of any group
+  	dataIn.readFully(buff, 0, fill);
+  	buffPos = 0;  	
+  	nextGroup ++;
   	
   	return true;
   }
+  
+  private boolean readBuffer() {
+		// read from buffer
+  	key.set(pos);
+  	int recordLen = index.get(nextRecord);
+	 	value.set(buff, buffPos, recordLen-1); // the last '\n' of record is omitted
+  	// update state
+	 	buffPos += recordLen;
+  	nextRecord ++;
+  	pos += recordLen;
+  
+  	return true;
+  }
+  
+//  private boolean nextGroup() throws IOException {
+//  	// find next block if needed
+//  	if(nextGroup >= numGroups && !nextBlock() )
+//  		return false;	
+//  	
+//  	
+//  }
   
   private static final int SIZE_128KB = 128 * 1024;
   

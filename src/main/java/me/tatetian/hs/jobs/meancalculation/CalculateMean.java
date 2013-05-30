@@ -46,7 +46,7 @@ public class CalculateMean extends Configured implements Tool {
 			conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, samplingRatio);
 		}
 		if(groupSize > 0) {
-			conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, groupSize);
+			conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_SEEKS, groupSize);
 		}
 		
 		

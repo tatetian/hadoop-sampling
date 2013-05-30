@@ -64,7 +64,7 @@ public class TestIndexedRecordReader {
 		input = new Path("tmp/test_mean_calculation.data");
 		
     conf.setFloat(IOConfigKeys.HS_INDEXED_RECORD_READER_SAMPLING_RATIO, 0.01f);
-    conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_GROUP_SIZE, 40);
+    conf.setInt(IOConfigKeys.HS_INDEXED_RECORD_READER_SEEKS, 40);
 		
 		IndexedRecordReader reader = getIndexedRecordReader();
 		while(reader.nextKeyValue()) {

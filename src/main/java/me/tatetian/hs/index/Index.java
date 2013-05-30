@@ -24,7 +24,7 @@ public class Index implements Writable {
 		numRecords = 0;
 	}
 	
-	public int size() {
+	public int numRecords() {
 		return numRecords;
 	}
 	
@@ -65,13 +65,13 @@ public class Index implements Writable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		int printLimit = Math.min(5, size());
+		int printLimit = Math.min(5, numRecords());
 		sb.append('{');
 		for(int i = 0; i < printLimit; i++) {
 			if(i != 0) sb.append(',');
 			sb.append(get(i));
 		}
-		if(size() > printLimit) sb.append("...");
+		if(numRecords() > printLimit) sb.append("...");
 		sb.append('}');
 		return sb.toString();
 	}
@@ -83,8 +83,8 @@ public class Index implements Writable {
 		Index another = (Index) o;
 		
 		// check size
-		int size = size();
-		if(size != another.size()) return false;
+		int size = numRecords();
+		if(size != another.numRecords()) return false;
 		// check content
 		for(int i = 0; i < size; i++)
 			if(recordLens[i] != another.recordLens[i]) return false;
