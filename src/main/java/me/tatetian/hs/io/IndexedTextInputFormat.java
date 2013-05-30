@@ -58,7 +58,6 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
 
         // Find all data nodes
         Map<String, List<IndexMeta>> dataNodes = new HashMap<String, List<IndexMeta>>();
-        dataNodes.put(NO_HOSTS, new ArrayList<IndexMeta>());
         for(BlockLocation bl: blkLocations) {
         	String[] hosts = bl.getHosts();
         	// if has hosts info
@@ -69,7 +68,8 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         	}
         }
         // Assign blocks to data nodes
-        String[] strDataNodes = dataNodes.keySet().toArray(new String[]{});
+        String[] strDataNodes = dataNodes.keySet().toArray(new String[]{});        
+        dataNodes.put(NO_HOSTS, new ArrayList<IndexMeta>());
         int numNodes = strDataNodes.length;
         int nodeId = 0;
         IndexMeta meta = new IndexMeta();
@@ -101,12 +101,14 @@ public class IndexedTextInputFormat extends FileInputFormat<LongWritable, Text> 
         }
         // Build splits for each data node
         final int NUM_MAP_SLOTS = conf.getInt("mapreduce.tasktracker.map.tasks.maximum", 2);
+        strDataNodes = Arrays.copyOf(strDataNodes, strDataNodes.length + 1);
+        strDataNodes[strDataNodes.length - 1] = NO_HOSTS;
         for(String node : strDataNodes) {
         	List<IndexMeta> blks = dataNodes.get(node);
         	int numBlks = blks.size();
         	int numEffectiveBlks = (int) (numBlks * samplingRatio);
-        	int numSplits 	 = splitable ? Math.min(NUM_MAP_SLOTS, numEffectiveBlks) : 1;
-        	int blksPerSplit = (int) Math.ceil( numBlks / numSplits );
+        	int numSplits 	 = splitable ? Math.max(NUM_MAP_SLOTS, numEffectiveBlks) : 1;
+        	int blksPerSplit = (int) Math.ceil( (float)numBlks / numSplits );
         	int blkId = 0;
         	while(numBlks > 0) {
         		int numBlksSplit = Math.min(numBlks, blksPerSplit);
